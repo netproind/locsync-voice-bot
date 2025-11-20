@@ -1,0 +1,13 @@
+{
+  "membership_type": "temporary",
+  "billing": {
+    "plan": "Temporary Employee Bot",
+    "hourly_rate": 2.50,
+    "minimum_hours": 4,
+    "billing_cycle": "usage_based"
+  },
+  "usage_limits": {
+    "requires_activation": true,
+    "track_usage": true
+  }
+}
