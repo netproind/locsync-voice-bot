@@ -1,0 +1,34 @@
+{
+  "name": "locsync-voice-bot",
+  "version": "1.0.0",
+  "description": "Multi-tenant AI voice and SMS bot for locticians",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "voice-bot",
+    "twilio",
+    "elevenlabs",
+    "ai-receptionist",
+    "loctician",
+    "appointment-booking"
+  ],
+  "author": "LocSync LLC",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "dotenv": "^16.3.1",
+    "twilio": "^4.19.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
