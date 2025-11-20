@@ -1,1 +1,98 @@
 
+{
+  "tenant_id": "TENANT-002",
+  "membership_type": "full_time",
+  
+  "salon_info": {
+    "salon_name": "Crown & Glory Locs",
+    "loctician_name": "Marcus",
+    "experience_years": 8,
+    "location": {
+      "city": "Atlanta",
+      "state": "Georgia",
+      "address": "456 Peachtree St NE, Atlanta, GA 30308",
+      "parking_info": "Parking garage available behind building, first hour free",
+      "directions_url": "https://maps.google.com/?q=456+Peachtree+St+Atlanta+GA"
+    }
+  },
+  
+  "contact": {
+    "phone": "+14045552001",
+    "business_phone": "+14045556789",
+    "email": "marcus@crownandglorylocs.com",
+    "website": "https://crownandglorylocs.com",
+    "instagram_handle": "@crownandglorylocs",
+    "instagram_url": "https://www.instagram.com/crownandglorylocs"
+  },
+  
+  "hours": {
+    "schedule": "Monday through Friday, 9 AM to 7 PM, Saturday 10 AM to 4 PM",
+    "closed_days": ["Sunday"],
+    "timezone": "America/New_York"
+  },
+  
+  "voice_config": {
+    "provider": "elevenlabs",
+    "voice_id": "ErXwobaYiN019PkySvjV",
+    "voice_name": "Antoni",
+    "model": "eleven_turbo_v2_5",
+    "stability": 0.6,
+    "similarity_boost": 0.8,
+    "greeting_tts": "Thanks for calling Crown and Glory Locs with Marcus. How can I assist you today?"
+  },
+  
+  "booking": {
+    "type": "consultation_first",
+    "main_booking_url": "https://calendly.com/marcuslocs/consultation",
+    "booking_instructions": "Book a consultation to discuss your loc goals and get personalized pricing",
+    "accepts_walkins": false,
+    "requires_consultation": true,
+    "consultation_url": "https://calendly.com/marcuslocs/consultation",
+    "consultation_fee": 50
+  },
+  
+  "services": {
+    "primary": ["Retwists", "Loc Repairs", "Loc Extensions", "Sisterlocks", "Loc Styling"],
+    "specialties": ["Loc Repairs", "Bald Coverage", "Sisterlocks"],
+    "starter_methods": ["Instant Locs", "Crochet Method", "Sisterlocks"]
+  },
+  
+  "pricing": {
+    "type": "consultation",
+    "details": "All pricing determined during consultation based on your specific needs",
+    "consultation_required": true
+  },
+  
+  "features_enabled": {
+    "voice_bot": true,
+    "sms_bot": true,
+    "appointment_lookup": false,
+    "quote_system": false,
+    "training_program": false,
+    "instagram_dm": false,
+    "multilingual": false
+  },
+  
+  "sms_config": {
+    "send_links": true,
+    "auto_respond": true,
+    "link_shortening": false
+  },
+  
+  "knowledge_base": {
+    "use_universal": true,
+    "custom_faqs": [
+      {
+        "question": "Do you do loc repairs?",
+        "answer": "Yes! Loc repairs are one of our specialties. We can repair thinning locs, broken locs, and provide bald coverage solutions. Book a consultation to discuss your specific needs."
+      }
+    ]
+  },
+  
+  "billing": {
+    "plan": "Full-Time Employee Bot",
+    "monthly_rate": 50.00,
+    "billing_cycle": "monthly",
+    "overage_charges": false
+  }
+}
