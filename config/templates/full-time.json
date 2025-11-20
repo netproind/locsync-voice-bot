@@ -1,0 +1,14 @@
+{
+  "membership_type": "full_time",
+  "billing": {
+    "plan": "Full-Time Employee Bot",
+    "monthly_rate": 50.00,
+    "billing_cycle": "monthly",
+    "overage_charges": false
+  },
+  "usage_limits": {
+    "calls_per_month": "unlimited",
+    "sms_per_month": "unlimited",
+    "minutes_per_month": "unlimited"
+  }
+}
