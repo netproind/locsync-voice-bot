@@ -1,1 +1,86 @@
+{
+  "tenant_id": "{{TENANT_ID}}",
+  "membership_type": "full_time",
+  
+  "salon_info": {
+    "salon_name": "{{SALON_NAME}}",
+    "loctician_name": "{{LOCTICIAN_NAME}}",
+    "experience_years": 10,
+    "location": {
+      "city": "{{CITY}}",
+      "state": "{{STATE}}",
+      "address": "{{ADDRESS}}",
+      "parking_info": "{{PARKING_INFO}}",
+      "directions_url": "{{DIRECTIONS_URL}}"
+    }
+  },
+  
+  "contact": {
+    "phone": "{{ASSIGNED_TWILIO_NUMBER}}",
+    "business_phone": "{{THEIR_EXISTING_PHONE}}",
+    "email": "{{EMAIL}}",
+    "website": "{{WEBSITE}}",
+    "instagram_handle": "{{INSTAGRAM}}",
+    "instagram_url": "https://www.instagram.com/{{INSTAGRAM_WITHOUT_@}}"
+  },
+  
+  "hours": {
+    "schedule": "{{HOURS_SCHEDULE}}",
+    "closed_days": ["{{CLOSED_DAY_1}}", "{{CLOSED_DAY_2}}"],
+    "timezone": "{{TIMEZONE}}"
+  },
+  
+  "voice_config": {
+    "provider": "elevenlabs",
+    "voice_id": "{{VOICE_ID}}",
+    "voice_name": "{{VOICE_NAME}}",
+    "model": "eleven_turbo_v2_5",
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "greeting_tts": "Thanks for calling {{SALON_NAME}}. How can I help you today?"
+  },
+  
+  "booking": {
+    "type": "simple",
+    "main_booking_url": "{{BOOKING_URL}}",
+    "booking_instructions": "{{BOOKING_INSTRUCTIONS}}",
+    "accepts_walkins": false,
+    "requires_consultation": false,
+    "consultation_url": "",
+    "consultation_fee": 0
+  },
+  
+  "services": {
+    "primary": ["Retwists", "Maintenance", "Loc Care"],
+    "specialties": [],
+    "starter_methods": ["Traditional", "Instant Locs"]
+  },
+  
+  "pricing": {
+    "type": "{{PRICING_TYPE}}",
+    "details": "{{PRICING_DETAILS}}",
+    "consultation_required": false
+  },
+  
+  "features_enabled": {
+    "voice_bot": true,
+    "sms_bot": true,
+    "appointment_lookup": false,
+    "quote_system": false,
+    "training_program": false,
+    "instagram_dm": false,
+    "multilingual": false
+  },
+  
+  "sms_config": {
+    "send_links": true,
+    "auto_respond": true,
+    "link_shortening": false
+  },
+  
+  "knowledge_base": {
+    "use_universal": true,
+    "custom_faqs": []
+  }
+}
 
