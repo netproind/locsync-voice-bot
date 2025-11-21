@@ -1,7 +1,6 @@
 {
   "tenant_id": "TENANT-001",
   "membership_type": "full_time",
-  
   "salon_info": {
     "salon_name": "Natural Roots by Sarah",
     "loctician_name": "Sarah",
@@ -14,7 +13,6 @@
       "directions_url": "https://maps.google.com/?q=123+Woodward+Ave+Detroit+MI"
     }
   },
-  
   "contact": {
     "phone": "+13134551001",
     "business_phone": "+13135551234",
@@ -23,22 +21,19 @@
     "instagram_handle": "@naturalrootslocs",
     "instagram_url": "https://www.instagram.com/naturalrootslocs"
   },
-  
   "hours": {
     "schedule": "Tuesday through Saturday, 10 AM to 6 PM",
     "closed_days": ["Sunday", "Monday"],
     "timezone": "America/Detroit"
   },
-  
-"voice_config": {
-  "provider": "elevenlabs",
-  "voice_id": "EXAzJmkLrxkPHh8wlC8P",
-  "model": "eleven_turbo_v2",
-  "stability": 0.5,
-  "similarity_boost": 0.75,
-  "greeting_tts": "Thanks for calling Natural Roots by Sarah. How can I help you today?"
-}
-  
+  "voice_config": {
+    "provider": "elevenlabs",
+    "voice_id": "EXAzJmkLrxkPHh8wlC8P",
+    "model": "eleven_turbo_v2",
+    "stability": 0.5,
+    "similarity_boost": 0.75,
+    "greeting_tts": "Thanks for calling Natural Roots by Sarah. How can I help you today?"
+  },
   "booking": {
     "type": "simple",
     "main_booking_url": "https://sarahlocs.as.me",
@@ -48,19 +43,16 @@
     "consultation_url": "",
     "consultation_fee": 0
   },
-  
   "services": {
     "primary": ["Retwists", "Loc Maintenance", "Starter Locs", "Loc Styling"],
     "specialties": ["Natural Loc Care", "Protective Styling"],
     "starter_methods": ["Comb Coil", "Two-Strand Twist", "Braids"]
   },
-  
   "pricing": {
-  "type": "flat_rate",
-  "details": "Retwist 75 to 95 dollars, Maintenance 100 to 150 dollars, Starter Locs 200 dollars and up",
-  "consultation_required": false
-},
-  
+    "type": "flat_rate",
+    "details": "Retwist 75 to 95 dollars, Maintenance 100 to 150 dollars, Starter Locs 200 plus",
+    "consultation_required": false
+  },
   "features_enabled": {
     "voice_bot": true,
     "sms_bot": true,
@@ -70,21 +62,18 @@
     "instagram_dm": false,
     "multilingual": false
   },
-  
   "sms_config": {
     "send_links": true,
     "auto_respond": true,
     "link_shortening": false
   },
-  
   "knowledge_base": {
     "use_universal": true,
     "custom_faqs": []
   },
-  
   "billing": {
     "plan": "Full-Time Employee Bot",
-    "monthly_rate": 50.00,
+    "monthly_rate": 50.0,
     "billing_cycle": "monthly",
     "overage_charges": false
   }
