@@ -30,15 +30,16 @@
     "timezone": "{{TIMEZONE}}"
   },
   
+  {
   "voice_config": {
     "provider": "elevenlabs",
-    "voice_id": "{{VOICE_ID}}",
-    "voice_name": "{{VOICE_NAME}}",
-    "model": "eleven_turbo_v2_5",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "model": "eleven_turbo_v2",
     "stability": 0.5,
     "similarity_boost": 0.75,
     "greeting_tts": "Thanks for calling {{SALON_NAME}}. How can I help you today?"
-  },
+  }
+}
   
   "booking": {
     "type": "simple",
