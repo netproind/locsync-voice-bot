@@ -30,11 +30,10 @@
     "timezone": "America/Detroit"
   },
   
-  "voice_config": {
+ "voice_config": {
     "provider": "elevenlabs",
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
-    "voice_name": "Rachel",
-    "model": "eleven_turbo_v2_5",
+    "model": "eleven_turbo_v2",
     "stability": 0.5,
     "similarity_boost": 0.75,
     "greeting_tts": "Thanks for calling Natural Roots by Sarah. How can I help you today?"
