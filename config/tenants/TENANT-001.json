@@ -56,10 +56,10 @@
   },
   
   "pricing": {
-    "type": "flat_rate",
-    "details": "Retwist $75-$95, Maintenance $100-$150, Starter Locs $200+",
-    "consultation_required": false
-  },
+  "type": "flat_rate",
+  "details": "Retwist 75 to 95 dollars, Maintenance 100 to 150 dollars, Starter Locs 200 dollars and up",
+  "consultation_required": false
+},
   
   "features_enabled": {
     "voice_bot": true,
