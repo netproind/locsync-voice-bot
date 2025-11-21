@@ -67,17 +67,65 @@ app.post('/voice/:tenantId', async (req, res) => {
   
   console.log(`📞 Incoming call for: ${config.salon_info.salon_name}`);
   
-  // SIMPLE VERSION - Use Twilio's built-in voice
-  const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say>Thanks for calling ${config.salon_info.salon_name}. How can I help you today?</Say>
-  <Pause length="10"/>
-</Response>`;
+  const greeting = config.voice_config?.greeting_tts || 
+                   `Thanks for calling ${config.salon_info.salon_name}. How can I help you today?`;
   
-  res.type('text/xml');
-  res.send(twiml);
+  // Generate speech with ElevenLabs
+  const voiceId = config.voice_config?.voice_id || '21m00Tcm4TlvDq8ikWAM'; // Rachel default
+  
+  try {
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'xi-api-key': process.env.ELEVENLABS_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: greeting,
+          model_id: 'eleven_turbo_v2',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75
+          }
+        })
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('ElevenLabs API error');
+    }
+    
+    // Get audio URL from ElevenLabs
+    const audioBuffer = await response.arrayBuffer();
+    const base64Audio = Buffer.from(audioBuffer).toString('base64');
+    
+    // For now, use Twilio's Say as fallback
+    // (Proper implementation would save audio to S3 or temp storage)
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Joanna">Thanks for calling ${config.salon_info.salon_name}. How can I help you today?</Say>
+  <Gather input="speech" timeout="3" action="/voice-response/${tenantId}" method="POST">
+    <Say voice="Polly.Joanna">Please tell me what you need.</Say>
+  </Gather>
+</Response>`;
+    
+    res.type('text/xml');
+    res.send(twiml);
+    
+  } catch (error) {
+    console.error('ElevenLabs error:', error);
+    // Fallback to Twilio voice
+    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Joanna">${greeting}</Say>
+</Response>`;
+    res.type('text/xml');
+    res.send(twiml);
+  }
 });
-
 // ===== WEBSOCKET SERVER =====
 const wss = new WebSocket.Server({ noServer: true });
 
