@@ -30,14 +30,14 @@
     "timezone": "America/Detroit"
   },
   
- "voice_config": {
-    "provider": "elevenlabs",
-    "voice_id": "21m00Tcm4TlvDq8ikWAM",
-    "model": "eleven_turbo_v2",
-    "stability": 0.5,
-    "similarity_boost": 0.75,
-    "greeting_tts": "Thanks for calling Natural Roots by Sarah. How can I help you today?"
-  },
+"voice_config": {
+  "provider": "elevenlabs",
+  "voice_id": "EXAzJmkLrxkPHh8wlC8P",
+  "model": "eleven_turbo_v2",
+  "stability": 0.5,
+  "similarity_boost": 0.75,
+  "greeting_tts": "Thanks for calling Natural Roots by Sarah. How can I help you today?"
+}
   
   "booking": {
     "type": "simple",
