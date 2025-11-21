@@ -67,11 +67,11 @@ app.post('/voice/:tenantId', async (req, res) => {
   
   console.log(`📞 Incoming call for: ${config.salon_info.salon_name}`);
   
+  // SIMPLE VERSION - Use Twilio's built-in voice
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Connect>
-    <Stream url="wss://${req.headers.host}/media-stream/${tenantId}" />
-  </Connect>
+  <Say>Thanks for calling ${config.salon_info.salon_name}. How can I help you today?</Say>
+  <Pause length="10"/>
 </Response>`;
   
   res.type('text/xml');
