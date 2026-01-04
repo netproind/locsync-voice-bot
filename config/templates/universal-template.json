@@ -1,87 +1,108 @@
 {
-  "tenant_id": "{{TENANT_ID}}",
-  "membership_type": "full_time",
-  
+  "tenant_id": "{{Actual Tenant ID}}",
+  "membership_type": "{{Membership Type}}",
+
   "salon_info": {
-    "salon_name": "{{SALON_NAME}}",
-    "loctician_name": "{{LOCTICIAN_NAME}}",
-    "experience_years": 10,
+    "salon_name": "{{Salon Name}}",
+    "loctician_name": "{{Loctician Name}}",
+    "experience_years": {{YEARS_EXPERIENCE}},
     "location": {
-      "city": "{{CITY}}",
-      "state": "{{STATE}}",
-      "address": "{{ADDRESS}}",
+      "city": "{{City}}",
+      "state": "{{State}}",
+      "address": "{{Address}}",
       "parking_info": "{{PARKING_INFO}}",
-      "directions_url": "{{DIRECTIONS_URL}}"
+      "directions_url": "{{DIRECTIONS_LINK}}"
     }
   },
-  
+
   "contact": {
-    "phone": "{{ASSIGNED_TWILIO_NUMBER}}",
-    "business_phone": "{{THEIR_EXISTING_PHONE}}",
-    "email": "{{EMAIL}}",
-    "website": "{{WEBSITE}}",
-    "instagram_handle": "{{INSTAGRAM}}",
-    "instagram_url": "https://www.instagram.com/{{INSTAGRAM_WITHOUT_@}}"
+    "phone": "{{Assigned Phone Number}}",
+    "business_phone": "{{Business Phone}}",
+    "email": "{{Email}}",
+    "website": "{{WEBSITE_URL}}",
+    "instagram_handle": "{{Instagram}}",
+    "instagram_url": "https://www.instagram.com/{{Instagram}}"
   },
-  
+
   "hours": {
-    "schedule": "{{HOURS_SCHEDULE}}",
-    "closed_days": ["{{CLOSED_DAY_1}}", "{{CLOSED_DAY_2}}"],
-    "timezone": "{{TIMEZONE}}"
+    "schedule": "{{HOURS}}",
+    "closed_days": ["Saturday"],
+    "timezone": "America/Detroit"
   },
-  
-  {
+
   "voice_config": {
     "provider": "elevenlabs",
     "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "model": "eleven_turbo_v2",
     "stability": 0.5,
     "similarity_boost": 0.75,
-    "greeting_tts": "Thanks for calling {{SALON_NAME}}. How can I help you today?"
-  }
-}
-  
+    "greeting_tts": "{{Bot Greeting}}"
+  },
+
+  "chat_config": {
+    "enabled": {{chat_enabled}},
+    "handoff_enabled": true,
+    "handoff_phone": "{{handoff_phone}}",
+    "ai_enabled": true
+  },
+
   "booking": {
     "type": "simple",
     "main_booking_url": "{{BOOKING_URL}}",
-    "booking_instructions": "{{BOOKING_INSTRUCTIONS}}",
-    "accepts_walkins": false,
-    "requires_consultation": false,
-    "consultation_url": "",
-    "consultation_fee": 0
+    "booking_window": "{{BOOKING_WINDOW}}",
+    "deposit_terms": "{{Deposit Terms}}",
+    "deposit_amount": {{DEPOSIT_AMOUNT}},
+    "consultation_fee": {{CONSULTATION_FEE}}
   },
-  
+
   "services": {
-    "primary": ["Retwists", "Maintenance", "Loc Care"],
-    "specialties": [],
-    "starter_methods": ["Traditional", "Instant Locs"]
+    "primary": {{Services}},
+    "specialties": [
+      "{{SPECIALTY_SERVICE_1_NAME}}",
+      "{{SPECIALTY_SERVICE_2_NAME}}",
+      "{{SPECIALTY_SERVICE_3_NAME}}"
+    ]
   },
-  
-  "pricing": {
-    "type": "{{PRICING_TYPE}}",
-    "details": "{{PRICING_DETAILS}}",
-    "consultation_required": false
+
+  "service_links": {
+    "retwist": "{{RETWIST_BOOKING_URL}}",
+    "wick": "{{WICK_BOOKING_URL}}",
+    "interlock": "{{INTERLOCK_BOOKING_URL}}",
+    "sisterlock": "{{SISTERLOCK_MICROLOCK_BOOKING_URL}}",
+    "crochet": "{{CROCHET_BOOKING_URL}}",
+    "instant_locs": "{{INSTANT_LOCS_BOOKING_URL}}",
+    "starter_locs": "{{STARTER_LOCS_BOOKING_URL}}",
+    "loc_extensions": "{{LOC_EXTENSIONS_BOOKING_URL}}",
+    "loc_repair": "{{LOC_REPAIR_BOOKING_URL}}"
   },
-  
+
+  "policies": {
+    "cancellation_policy": "{{CANCELLATION_POLICY}}",
+    "children_allowed": "{{CHILDREN_ALLOWED}}",
+    "pet_policy": "{{PET_POLICY}}",
+    "safety_policy": "{{SAFETY_POLICY}}",
+    "booking_policy": "{{BOOKING_POLICY}}",
+    "terms": "{{Terms}}"
+  },
+
   "features_enabled": {
     "voice_bot": true,
     "sms_bot": true,
-    "appointment_lookup": false,
-    "quote_system": false,
-    "training_program": false,
-    "instagram_dm": false,
-    "multilingual": false
+    "chat_bot": {{chat_enabled}},
+    "same_day_availability": "{{SAME_DAY_AVAILABILITY}}",
+    "mobile_service": "{{MOBILE_SERVICE_AVAILABILITY}}"
   },
-  
+
   "sms_config": {
     "send_links": true,
-    "auto_respond": true,
-    "link_shortening": false
+    "auto_respond": true
   },
-  
-  "knowledge_base": {
-    "use_universal": true,
-    "custom_faqs": []
+
+  "meta": {
+    "rating": "{{Rating}}",
+    "review_link": "{{Review Link}}",
+    "avatar": "{{Avatar}}",
+    "config_status": "{{Config Status}}",
+    "notes": "{{Notes}}"
   }
 }
-
