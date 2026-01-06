@@ -63,7 +63,7 @@
 
 
   "services": {
-    "primary": ["Retwist", "Wick Locs", "Loc Repair", "Crochet", "Interlock"]
+    "primary": ["Retwist", "Wick Locs", "Loc Repair", "Crochet", "Interlock"],
     "specialties": [
       "Bald coverage",
       "Wedding Services",
@@ -118,3 +118,4 @@
     "notes": "test tenant"
   }
 }
+
