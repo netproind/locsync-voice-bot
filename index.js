@@ -13,6 +13,7 @@ const twilio = require("twilio");
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 /* =========================
    ENV + TWILIO
@@ -283,7 +284,6 @@ async function generateChatResponse(text, config) {
   return `I can help with HOURS, BOOKING, PRICING, or LOCATION.`;
 }
 
-app.use(express.static('public'));
 /* =========================
    HEALTH CHECK
 ========================= */
