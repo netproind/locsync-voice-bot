@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LocSync Chat</title>
+  <style>
+    #locsync-chat-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+    }
+
+    #locsync-chat-window {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 350px;
+      height: 500px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      background: white;
+      overflow: hidden;
+    }
+
+    #locsync-chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #locsync-chat-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    #locsync-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #f5f5f5;
+    }
+
+    .locsync-message {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .locsync-message.user {
+      background: #667eea;
+      color: white;
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .locsync-message.bot {
+      background: white;
+      color: #333;
+      margin-right: auto;
+    }
+
+    #locsync-chat-input-container {
+      display: flex;
+      padding: 12px;
+      border-top: 1px solid #ddd;
+      background: white;
+    }
+
+    #locsync-chat-input {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 10px 16px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    #locsync-chat-send {
+      background: #667eea;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      margin-left: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <button id="locsync-chat-button">💬</button>
+  
+  <div id="locsync-chat-window">
+    <div id="locsync-chat-header">
+      <span id="locsync-salon-name">Chat with us</span>
+      <button id="locsync-chat-close">×</button>
+    </div>
+    <div id="locsync-chat-messages"></div>
+    <div id="locsync-chat-input-container">
+      <input type="text" id="locsync-chat-input" placeholder="Type a message...">
+      <button id="locsync-chat-send">➤</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const TENANT_ID = 'TENANT-136'; // This gets dynamically set per tenant
+      const API_BASE = 'https://locsync-voice-bot.onrender.com';
+      
+      let sessionToken = null;
+      let conversationSid = null;
+      
+      const chatButton = document.getElementById('locsync-chat-button');
+      const chatWindow = document.getElementById('locsync-chat-window');
+      const chatClose = document.getElementById('locsync-chat-close');
+      const chatInput = document.getElementById('locsync-chat-input');
+      const chatSend = document.getElementById('locsync-chat-send');
+      const chatMessages = document.getElementById('locsync-chat-messages');
+      
+      chatButton.addEventListener('click', async () => {
+        chatWindow.style.display = 'flex';
+        chatButton.style.display = 'none';
+        
+        if (!sessionToken) {
+          await startSession();
+        }
+      });
+      
+      chatClose.addEventListener('click', () => {
+        chatWindow.style.display = 'none';
+        chatButton.style.display = 'flex';
+      });
+      
+      async function startSession() {
+        try {
+          const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
+            method: 'POST'
+          });
+          const data = await res.json();
+          
+          if (data.error) {
+            addMessage('bot', 'Chat is currently unavailable.');
+            return;
+          }
+          
+          sessionToken = data.sessionToken;
+          conversationSid = data.conversationSid;
+          
+          // Wait a moment for the welcome message to be created
+          setTimeout(() => pollMessages(), 1000);
+        } catch (err) {
+          addMessage('bot', 'Connection error. Please try again.');
+        }
+      }
+      
+      async function sendMessage(text) {
+        if (!text.trim() || !sessionToken) return;
+        
+        addMessage('user', text);
+        chatInput.value = '';
+        
+        try {
+          await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionToken, message: text })
+          });
+          
+          setTimeout(() => pollMessages(), 1000);
+        } catch (err) {
+          addMessage('bot', 'Failed to send message.');
+        }
+      }
+      
+      async function pollMessages() {
+        // For now, this is a simple implementation
+        // In production, use Twilio's JS SDK for real-time updates
+      }
+      
+      function addMessage(type, text) {
+        const msg = document.createElement('div');
+        msg.className = `locsync-message ${type}`;
+        msg.textContent = text;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+      
+      chatSend.addEventListener('click', () => sendMessage(chatInput.value));
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage(chatInput.value);
+      });
+    })();
+  </script>
+</body>
+</html>
