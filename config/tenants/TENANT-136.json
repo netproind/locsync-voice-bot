@@ -57,13 +57,13 @@
     "main_booking_url": "locrepair.as.me",
     "booking_window": "30 days",
     "deposit_terms": "Goes toward service",
-    "deposit_amount": $25.00,
-    "consultation_fee": $25.00
+    "deposit_amount": "25.00",
+    "consultation_fee": "25.00"
   },
 
 
   "services": {
-    "primary": {{Services}},
+    "primary": Retwists, Interlock Roots, Wick Maintenance, Sisterlock Maintenance,
     "specialties": [
       "Bald coverage",
       "Wedding Services",
@@ -118,3 +118,4 @@
     "notes": "test tenant"
   }
 }
+
