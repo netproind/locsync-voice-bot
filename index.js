@@ -161,6 +161,16 @@ app.post("/voice-response/:tenantId", async (req, res) => {
 /* =========================
    WEB CHAT START
 ========================= */
+// ADD THIS BEFORE THE /webchat/:tenantId/start ROUTE
+app.get("/test-config/:tenantId", (req, res) => {
+  const config = loadTenantConfig(req.params.tenantId);
+  res.json({
+    loaded: !!config,
+    salon_name: config?.salon_info?.salon_name,
+    chat_enabled: config?.chat_config?.enabled
+  });
+});
+
 app.post("/webchat/:tenantId/start", async (req, res) => {
   const config = loadTenantConfig(req.params.tenantId);
   if (!config || !config.chat_config?.enabled)
