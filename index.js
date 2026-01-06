@@ -283,6 +283,7 @@ async function generateChatResponse(text, config) {
   return `I can help with HOURS, BOOKING, PRICING, or LOCATION.`;
 }
 
+app.use(express.static('public'));
 /* =========================
    HEALTH CHECK
 ========================= */
