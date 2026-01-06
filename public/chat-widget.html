@@ -198,10 +198,32 @@
         }
       }
       
-      async function pollMessages() {
-        // For now, this is a simple implementation
-        // In production, use Twilio's JS SDK for real-time updates
-      }
+     let lastMessageIndex = 0;
+
+async function pollMessages() {
+  if (!conversationSid) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
+    const data = await res.json();
+    
+    if (data.messages) {
+      data.messages.forEach(msg => {
+        if (msg.index > lastMessageIndex && msg.author === 'locsync_ai') {
+          addMessage('bot', msg.body);
+          lastMessageIndex = msg.index;
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Poll error:', err);
+  }
+}
+
+// Poll every 2 seconds
+setInterval(() => {
+  if (sessionToken) pollMessages();
+}, 2000);
       
       function addMessage(type, text) {
         const msg = document.createElement('div');
