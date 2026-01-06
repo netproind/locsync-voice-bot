@@ -48,6 +48,8 @@ function safeJsonParse(str, fallback = {}) {
 function loadTenantConfig(tenantId) {
   try {
     const filePath = path.join(__dirname, "config", "tenants", `${tenantId}.json`);
+     console.log("🔍 Looking for tenant at:", filePath); // ADD THIS
+    console.log("📁 File exists?", fs.existsSync(filePath)); // ADD THIS
     const config = JSON.parse(fs.readFileSync(filePath, "utf8"));
     console.log(`✅ Loaded tenant: ${config.salon_info.salon_name}`);
     return config;
