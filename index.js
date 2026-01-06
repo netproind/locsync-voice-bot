@@ -283,6 +283,29 @@ async function generateChatResponse(text, config) {
 
   return `I can help with HOURS, BOOKING, PRICING, or LOCATION.`;
 }
+app.get("/webchat/:tenantId/messages", async (req, res) => {
+  const { conversationSid, sessionToken } = req.query;
+  const sess = WEBCHAT_SESSIONS.get(sessionToken);
+  
+  if (!sess) return res.sendStatus(403);
+  
+  try {
+    const messages = await twilioClient.conversations.v1
+      .conversations(conversationSid)
+      .messages.list({ limit: 50 });
+    
+    res.json({
+      messages: messages.map(m => ({
+        author: m.author,
+        body: m.body,
+        index: m.index
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 /* =========================
    HEALTH CHECK
