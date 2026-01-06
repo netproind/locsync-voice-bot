@@ -172,35 +172,43 @@ app.get("/test-config/:tenantId", (req, res) => {
 });
 
 app.post("/webchat/:tenantId/start", async (req, res) => {
-  const config = loadTenantConfig(req.params.tenantId);
-  if (!config || !config.chat_config?.enabled)
-    return res.status(403).json({ error: "Chat disabled" });
+  try {
+    const config = loadTenantConfig(req.params.tenantId);
+    console.log("🔍 Config loaded:", !!config);
+    console.log("🔍 Chat enabled:", config?.chat_config?.enabled);
+    
+    if (!config || !config.chat_config?.enabled) {
+      return res.status(403).json({ error: "Chat disabled" });
+    }
 
-  const convo = await twilioClient.conversations.v1.conversations.create({
-    friendlyName: `${config.salon_info.salon_name} Web Chat`,
-    attributes: JSON.stringify({ tenant_id: req.params.tenantId })
-  });
-
-  await twilioClient.conversations.v1
-    .conversations(convo.sid)
-    .webhooks.create({
-      target: "webhook",
-      "configuration.url": `${PUBLIC_BASE_URL}/chat/webhook`,
-      "configuration.method": "POST",
-      "configuration.filters": ["onMessageAdded"]
+    console.log("✅ Creating Twilio conversation...");
+    
+    const convo = await twilioClient.conversations.v1.conversations.create({
+      friendlyName: `${config.salon_info.salon_name} Web Chat`,
+      attributes: JSON.stringify({ tenant_id: req.params.tenantId })
     });
 
-  const token = makeToken();
-  WEBCHAT_SESSIONS.set(token, { conversationSid: convo.sid, tenantId: req.params.tenantId });
+    console.log("✅ Conversation created:", convo.sid);
 
-  await twilioClient.conversations.v1
-    .conversations(convo.sid)
-    .messages.create({
-      author: "locsync_ai",
-      body: `Hi! Welcome to ${config.salon_info.salon_name}. How can I help?`
-    });
+    const token = makeToken();
+    WEBCHAT_SESSIONS.set(token, { conversationSid: convo.sid, tenantId: req.params.tenantId });
 
-  res.json({ sessionToken: token, conversationSid: convo.sid });
+    await twilioClient.conversations.v1
+      .conversations(convo.sid)
+      .messages.create({
+        author: "locsync_ai",
+        body: `Hi! Welcome to ${config.salon_info.salon_name}. How can I help?`
+      });
+
+    console.log("✅ Session created");
+    
+    res.json({ sessionToken: token, conversationSid: convo.sid });
+    
+  } catch (error) {
+    console.error("❌ Webchat start error:", error.message);
+    console.error("❌ Full error:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* =========================
