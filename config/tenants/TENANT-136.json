@@ -20,7 +20,7 @@
   "contact": {
     "phone": "313-455-5627",
     "business_phone": "13134884898",
-    "email": "unh@locrepa8r.com",
+    "email": "unh@locrepair.com",
     "website": "www.locrepair.com",
     "instagram_handle": "locrepairexpert",
     "instagram_url": "https://www.instagram.com/locrepairexpert"
@@ -63,7 +63,7 @@
 
 
   "services": {
-    "primary": Retwists, Interlock Roots, Wick Maintenance, Sisterlock Maintenance,
+    "primary": ["Retwist", "Wick Locs", "Loc Repair", "Crochet", "Interlock"]
     "specialties": [
       "Bald coverage",
       "Wedding Services",
@@ -118,4 +118,5 @@
     "notes": "test tenant"
   }
 }
+
 
