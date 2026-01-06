@@ -263,6 +263,62 @@ app.post("/chat/webhook", async (req, res) => {
   res.json({ ok: true });
 });
 
+app.post("/chat/webhook", async (req, res) => {
+  console.log("🔔 Webhook received:", req.body.EventType);
+  console.log("👤 Author:", req.body.Author);
+  console.log("💬 Body:", req.body.Body);
+  
+  if (req.body.EventType !== "onMessageAdded") {
+    console.log("⏭️ Skipping non-message event");
+    return res.json({ ok: true });
+  }
+
+  const author = req.body.Author;
+  const body = (req.body.Body || "").trim();
+
+  if (!body) {
+    console.log("⏭️ Empty message");
+    return res.json({ ok: true });
+  }
+  
+  if (author === "locsync_ai") {
+    console.log("⏭️ Skipping own message");
+    return res.json({ ok: true });
+  }
+  
+  if (author === "web_visitor") {
+    console.log("⏭️ Skipping web visitor echo");
+    return res.json({ ok: true });
+  }
+
+  console.log("✅ Processing message from:", author);
+
+  const convo = await twilioClient.conversations.v1
+    .conversations(req.body.ConversationSid)
+    .fetch();
+
+  const tenantId = safeJsonParse(convo.attributes).tenant_id;
+  const config = loadTenantConfig(tenantId);
+  
+  if (!config) {
+    console.log("❌ No config found");
+    return res.json({ ok: true });
+  }
+
+  const reply = await generateChatResponse(body, config);
+  console.log("🤖 Sending reply:", reply);
+
+  await twilioClient.conversations.v1
+    .conversations(convo.sid)
+    .messages.create({
+      author: "locsync_ai",
+      body: reply
+    });
+
+  console.log("✅ Reply sent");
+  res.json({ ok: true });
+});
+
 /* =========================
    CHAT LOGIC
 ========================= */
