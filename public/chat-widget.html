@@ -128,116 +128,116 @@
     </div>
   </div>
 
-  <script>
-    (function() {
-      const TENANT_ID = 'TENANT-136'; // This gets dynamically set per tenant
-      const API_BASE = 'https://locsync-voice-bot.onrender.com';
-      
-      let sessionToken = null;
-      let conversationSid = null;
-      
-      const chatButton = document.getElementById('locsync-chat-button');
-      const chatWindow = document.getElementById('locsync-chat-window');
-      const chatClose = document.getElementById('locsync-chat-close');
-      const chatInput = document.getElementById('locsync-chat-input');
-      const chatSend = document.getElementById('locsync-chat-send');
-      const chatMessages = document.getElementById('locsync-chat-messages');
-      
-      chatButton.addEventListener('click', async () => {
-        chatWindow.style.display = 'flex';
-        chatButton.style.display = 'none';
-        
-        if (!sessionToken) {
-          await startSession();
-        }
-      });
-      
-      chatClose.addEventListener('click', () => {
-        chatWindow.style.display = 'none';
-        chatButton.style.display = 'flex';
-      });
-      
-      async function startSession() {
-        try {
-          const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
-            method: 'POST'
-          });
-          const data = await res.json();
-          
-          if (data.error) {
-            addMessage('bot', 'Chat is currently unavailable.');
-            return;
-          }
-          
-          sessionToken = data.sessionToken;
-          conversationSid = data.conversationSid;
-          
-          // Wait a moment for the welcome message to be created
-          setTimeout(() => pollMessages(), 1000);
-        } catch (err) {
-          addMessage('bot', 'Connection error. Please try again.');
-        }
-      }
-      
-      async function sendMessage(text) {
-        if (!text.trim() || !sessionToken) return;
-        
-        addMessage('user', text);
-        chatInput.value = '';
-        
-        try {
-          await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionToken, message: text })
-          });
-          
-          setTimeout(() => pollMessages(), 1000);
-        } catch (err) {
-          addMessage('bot', 'Failed to send message.');
-        }
-      }
-      
-     let lastMessageIndex = 0;
-
-async function pollMessages() {
-  if (!conversationSid) return;
-  
-  try {
-    const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
-    const data = await res.json();
+ <script>
+  (function() {
+    const TENANT_ID = 'TENANT-136';
+    const API_BASE = 'https://locsync-voice-bot.onrender.com';
     
-    if (data.messages) {
-      data.messages.forEach(msg => {
-        if (msg.index > lastMessageIndex && msg.author === 'locsync_ai') {
-          addMessage('bot', msg.body);
-          lastMessageIndex = msg.index;
-        }
-      });
-    }
-  } catch (err) {
-    console.error('Poll error:', err);
-  }
-}
-
-// Poll every 2 seconds
-setInterval(() => {
-  if (sessionToken) pollMessages();
-}, 2000);
+    let sessionToken = null;
+    let conversationSid = null;
+    let lastMessageIndex = 0;
+    
+    const chatButton = document.getElementById('locsync-chat-button');
+    const chatWindow = document.getElementById('locsync-chat-window');
+    const chatClose = document.getElementById('locsync-chat-close');
+    const chatInput = document.getElementById('locsync-chat-input');
+    const chatSend = document.getElementById('locsync-chat-send');
+    const chatMessages = document.getElementById('locsync-chat-messages');
+    
+    chatButton.addEventListener('click', async () => {
+      chatWindow.style.display = 'flex';
+      chatButton.style.display = 'none';
       
-      function addMessage(type, text) {
-        const msg = document.createElement('div');
-        msg.className = `locsync-message ${type}`;
-        msg.textContent = text;
-        chatMessages.appendChild(msg);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+      if (!sessionToken) {
+        await startSession();
       }
+    });
+    
+    chatClose.addEventListener('click', () => {
+      chatWindow.style.display = 'none';
+      chatButton.style.display = 'flex';
+    });
+    
+    async function startSession() {
+      try {
+        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        
+        if (data.error) {
+          addMessage('bot', 'Chat is currently unavailable.');
+          return;
+        }
+        
+        sessionToken = data.sessionToken;
+        conversationSid = data.conversationSid;
+        
+        setTimeout(() => pollMessages(), 1000);
+      } catch (err) {
+        console.error('Start session error:', err);
+        addMessage('bot', 'Connection error. Please try again.');
+      }
+    }
+    
+    async function sendMessage(text) {
+      if (!text.trim() || !sessionToken) return;
       
-      chatSend.addEventListener('click', () => sendMessage(chatInput.value));
-      chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage(chatInput.value);
-      });
-    })();
-  </script>
+      addMessage('user', text);
+      chatInput.value = '';
+      
+      try {
+        await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionToken, message: text })
+        });
+        
+        setTimeout(() => pollMessages(), 1500);
+      } catch (err) {
+        console.error('Send error:', err);
+        addMessage('bot', 'Failed to send message.');
+      }
+    }
+    
+    async function pollMessages() {
+      if (!conversationSid) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
+        const data = await res.json();
+        
+        if (data.messages) {
+          data.messages.forEach(msg => {
+            if (msg.index > lastMessageIndex && msg.author === 'locsync_ai') {
+              addMessage('bot', msg.body);
+              lastMessageIndex = msg.index;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Poll error:', err);
+      }
+    }
+    
+    // Poll every 2 seconds
+    setInterval(() => {
+      if (sessionToken) pollMessages();
+    }, 2000);
+    
+    function addMessage(type, text) {
+      const msg = document.createElement('div');
+      msg.className = `locsync-message ${type}`;
+      msg.textContent = text;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    chatSend.addEventListener('click', () => sendMessage(chatInput.value));
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage(chatInput.value);
+    });
+  })();
+</script>
 </body>
 </html>
