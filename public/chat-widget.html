@@ -2,65 +2,188 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LocSync Chat</title>
   <style>
-    #locsync-chat-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 9998;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f0f0;
+      height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 28px;
-      color: white;
-    }
-
-    #locsync-chat-window {
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 350px;
-      height: 500px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      z-index: 9999;
-      display: none;
-      flex-direction: column;
-      background: white;
-      overflow: hidden;
-    }
-
-    #locsync-chat-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 16px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
       align-items: center;
     }
-
-    #locsync-chat-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
+    #chat-container {
+      width: 400px;
+      height: 600px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
     }
-
-    #locsync-chat-messages {
+    #chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px 12px 0 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    #messages {
       flex: 1;
       overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message {
+      padding: 12px 16px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    .bot {
+      background: #f0f0f0;
+      align-self: flex-start;
+    }
+    .user {
+      background: #667eea;
+      color: white;
+      align-self: flex-end;
+    }
+    #input-area {
+      display: flex;
       padding: 16px;
-      background: #f5f5f5;
+      border-top: 1px solid #e0e0e0;
+      gap: 8px;
+    }
+    #message-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      outline: none;
+      font-size: 14px;
+    }
+    #send-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #send-btn:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">Loc Repair Clinic</div>
+    <div id="messages"></div>
+    <div id="input-area">
+      <input type="text" id="message-input" placeholder="Type your message...">
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://locsync-voice-bot.onrender.com';
+    const TENANT_ID = 'TENANT-136';
+    
+    let sessionToken = null;
+    let conversationSid = null;
+    let lastCheckTime = 0;
+    
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    
+    // Start session on page load
+    startChat();
+    
+    async function startChat() {
+      try {
+        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+        
+        if (data.sessionToken) {
+          sessionToken = data.sessionToken;
+          conversationSid = data.conversationSid;
+          
+          // Get initial messages after 1 second
+          setTimeout(getMessages, 1000);
+        }
+      } catch (err) {
+        addMessage('bot', 'Connection error. Please refresh the page.');
+      }
+    }
+    
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text || !sessionToken) return;
+      
+      addMessage('user', text);
+      input.value = '';
+      
+      try {
+        await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionToken, message: text })
+        });
+        
+        // Check for response after 2 seconds
+        setTimeout(getMessages, 2000);
+      } catch (err) {
+        addMessage('bot', 'Failed to send. Please try again.');
+      }
+    }
+    
+    async function getMessages() {
+      if (!conversationSid || !sessionToken) return;
+      
+      try {
+        const res = await fetch(
+          `${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`
+        );
+        const data = await res.json();
+        
+        if (data.messages) {
+          data.messages.forEach(msg => {
+            if (msg.author === 'locsync_ai' && msg.index > lastCheckTime) {
+              addMessage('bot', msg.body);
+              lastCheckTime = msg.index;
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Get messages error:', err);
+      }
+    }
+    
+    function addMessage(type, text) {
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+      msg.textContent = text;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    sendBtn.onclick = sendMessage;
+    input.onkeypress = (e) => {
+      if (e.key === 'Enter') sendMessage();
+    };
+  </script>
+</body>
+</html>      background: #f5f5f5;
     }
 
     .locsync-message {
