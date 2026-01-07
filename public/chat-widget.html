@@ -192,12 +192,15 @@
           body: JSON.stringify({ sessionToken, message: text })
         });
         
-        setTimeout(() => pollMessages(), 1500);
-      } catch (err) {
-        console.error('Send error:', err);
-        addMessage('bot', 'Failed to send message.');
-      }
-    }
+         // Poll 3 times with delays to catch the response
+    setTimeout(() => pollMessages(), 1000);
+    setTimeout(() => pollMessages(), 2000);
+    setTimeout(() => pollMessages(), 3000);
+  } catch (err) {
+    console.error('Send error:', err);
+    addMessage('bot', 'Failed to send message.');
+  }
+}
     
 const seenMessages = new Set();
 
