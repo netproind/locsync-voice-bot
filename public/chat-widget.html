@@ -1,11 +1,12 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Chat Test</title>
+  <script src="https://media.twiliocdn.com/sdk/js/conversations/v2.4/twilio-conversations.min.js"></script>
 </head>
 <body>
-  <h1>LocSync Chat Test</h1>
+  <h1>LocSync Chat</h1>
   <div id="messages" style="border: 1px solid black; height: 400px; overflow-y: auto; padding: 10px; margin-bottom: 10px;"></div>
   <input type="text" id="input" style="width: 300px;">
   <button id="send">Send</button>
@@ -14,58 +15,48 @@
     const API = 'https://locsync-voice-bot.onrender.com';
     const TENANT = 'TENANT-136';
     
-    let token = null;
-    let convo = null;
-    let seenIndices = new Set();
+    let client = null;
+    let conversation = null;
     
     const msgs = document.getElementById('messages');
     const inp = document.getElementById('input');
     const btn = document.getElementById('send');
     
-    // Start
-    fetch(`${API}/webchat/${TENANT}/start`, { method: 'POST' })
+    // Get access token and start
+    fetch(`${API}/webchat/${TENANT}/token`, { method: 'POST' })
       .then(r => r.json())
-      .then(d => {
-        token = d.sessionToken;
-        convo = d.conversationSid;
-        log('Connected');
-        setTimeout(check, 1000);
-      });
+      .then(async d => {
+        log('Connecting...');
+        
+        // Initialize Twilio Conversations client
+        client = await Twilio.Conversations.Client.create(d.token);
+        
+        // Get or create conversation
+        conversation = await client.getConversationBySid(d.conversationSid);
+        
+        // Listen for new messages in real-time
+        conversation.on('messageAdded', (message) => {
+          if (message.author !== 'website_user') {
+            log('Bot: ' + message.body);
+          }
+        });
+        
+        log('Connected! Type a message.');
+      })
+      .catch(err => log('Error: ' + err.message));
     
-    // Send
-    btn.onclick = () => {
+    // Send message
+    btn.onclick = async () => {
       const text = inp.value.trim();
-      if (!text) return;
+      if (!text || !conversation) return;
       
       log('You: ' + text);
       inp.value = '';
       
-      fetch(`${API}/webchat/${TENANT}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionToken: token, message: text })
-      }).then(() => setTimeout(check, 2000));
+      await conversation.sendMessage(text);
     };
     
     inp.onkeypress = (e) => { if (e.key === 'Enter') btn.click(); };
-    
-    // Check messages
-    function check() {
-      if (!convo) return;
-      
-      fetch(`${API}/webchat/${TENANT}/messages?conversationSid=${convo}&sessionToken=${token}`)
-        .then(r => r.json())
-        .then(d => {
-          if (d.messages) {
-            d.messages.forEach(m => {
-              if (m.author === 'locsync_ai' && !seenIndices.has(m.index)) {
-                log('Bot: ' + m.body);
-                seenIndices.add(m.index);
-              }
-            });
-          }
-        });
-    }
     
     function log(text) {
       msgs.innerHTML += text + '<br>';
