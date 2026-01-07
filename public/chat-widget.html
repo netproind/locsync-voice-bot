@@ -1,375 +1,76 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocSync Chat</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f0f0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #chat-container {
-      width: 400px;
-      height: 600px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    #chat-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 12px 12px 0 0;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .message {
-      padding: 12px 16px;
-      border-radius: 18px;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
-    .bot {
-      background: #f0f0f0;
-      align-self: flex-start;
-    }
-    .user {
-      background: #667eea;
-      color: white;
-      align-self: flex-end;
-    }
-    #input-area {
-      display: flex;
-      padding: 16px;
-      border-top: 1px solid #e0e0e0;
-      gap: 8px;
-    }
-    #message-input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 24px;
-      outline: none;
-      font-size: 14px;
-    }
-    #send-btn {
-      background: #667eea;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 24px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    #send-btn:hover {
-      background: #5568d3;
-    }
-  </style>
+  <title>Chat Test</title>
 </head>
 <body>
-  <div id="chat-container">
-    <div id="chat-header">Loc Repair Clinic</div>
-    <div id="messages"></div>
-    <div id="input-area">
-      <input type="text" id="message-input" placeholder="Type your message...">
-      <button id="send-btn">Send</button>
-    </div>
-  </div>
+  <h1>LocSync Chat Test</h1>
+  <div id="messages" style="border: 1px solid black; height: 400px; overflow-y: auto; padding: 10px; margin-bottom: 10px;"></div>
+  <input type="text" id="input" style="width: 300px;">
+  <button id="send">Send</button>
 
   <script>
-    const API_BASE = 'https://locsync-voice-bot.onrender.com';
-    const TENANT_ID = 'TENANT-136';
+    const API = 'https://locsync-voice-bot.onrender.com';
+    const TENANT = 'TENANT-136';
     
-    let sessionToken = null;
-    let conversationSid = null;
-    let lastCheckTime = 0;
+    let token = null;
+    let convo = null;
+    let seenIndices = new Set();
     
-    const messagesDiv = document.getElementById('messages');
-    const input = document.getElementById('message-input');
-    const sendBtn = document.getElementById('send-btn');
+    const msgs = document.getElementById('messages');
+    const inp = document.getElementById('input');
+    const btn = document.getElementById('send');
     
-    // Start session on page load
-    startChat();
-    
-    async function startChat() {
-      try {
-        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
-          method: 'POST'
-        });
-        const data = await res.json();
-        
-        if (data.sessionToken) {
-          sessionToken = data.sessionToken;
-          conversationSid = data.conversationSid;
-          
-          // Get initial messages after 1 second
-          setTimeout(getMessages, 1000);
-        }
-      } catch (err) {
-        addMessage('bot', 'Connection error. Please refresh the page.');
-      }
-    }
-    
-    async function sendMessage() {
-      const text = input.value.trim();
-      if (!text || !sessionToken) return;
-      
-      addMessage('user', text);
-      input.value = '';
-      
-      try {
-        await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionToken, message: text })
-        });
-        
-        // Check for response after 2 seconds
-        setTimeout(getMessages, 2000);
-      } catch (err) {
-        addMessage('bot', 'Failed to send. Please try again.');
-      }
-    }
-    
-    async function getMessages() {
-      if (!conversationSid || !sessionToken) return;
-      
-      try {
-        const res = await fetch(
-          `${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`
-        );
-        const data = await res.json();
-        
-        if (data.messages) {
-          data.messages.forEach(msg => {
-            if (msg.author === 'locsync_ai' && msg.index > lastCheckTime) {
-              addMessage('bot', msg.body);
-              lastCheckTime = msg.index;
-            }
-          });
-        }
-      } catch (err) {
-        console.error('Get messages error:', err);
-      }
-    }
-    
-    function addMessage(type, text) {
-      const msg = document.createElement('div');
-      msg.className = `message ${type}`;
-      msg.textContent = text;
-      messagesDiv.appendChild(msg);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-    
-    sendBtn.onclick = sendMessage;
-    input.onkeypress = (e) => {
-      if (e.key === 'Enter') sendMessage();
-    };
-  </script>
-</body>
-</html>      background: #f5f5f5;
-    }
-
-    .locsync-message {
-      margin-bottom: 12px;
-      padding: 10px 14px;
-      border-radius: 18px;
-      max-width: 70%;
-      word-wrap: break-word;
-    }
-
-    .locsync-message.user {
-      background: #667eea;
-      color: white;
-      margin-left: auto;
-      text-align: right;
-    }
-
-    .locsync-message.bot {
-      background: white;
-      color: #333;
-      margin-right: auto;
-    }
-
-    #locsync-chat-input-container {
-      display: flex;
-      padding: 12px;
-      border-top: 1px solid #ddd;
-      background: white;
-    }
-
-    #locsync-chat-input {
-      flex: 1;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      padding: 10px 16px;
-      outline: none;
-      font-size: 14px;
-    }
-
-    #locsync-chat-send {
-      background: #667eea;
-      border: none;
-      color: white;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      margin-left: 8px;
-      cursor: pointer;
-      font-size: 18px;
-    }
-  </style>
-</head>
-<body>
-  <button id="locsync-chat-button">💬</button>
-  
-  <div id="locsync-chat-window">
-    <div id="locsync-chat-header">
-      <span id="locsync-salon-name">Chat with us</span>
-      <button id="locsync-chat-close">×</button>
-    </div>
-    <div id="locsync-chat-messages"></div>
-    <div id="locsync-chat-input-container">
-      <input type="text" id="locsync-chat-input" placeholder="Type a message...">
-      <button id="locsync-chat-send">➤</button>
-    </div>
-  </div>
-
- <script>
-  (function() {
-    const TENANT_ID = 'TENANT-136';
-    const API_BASE = 'https://locsync-voice-bot.onrender.com';
-    
-    let sessionToken = null;
-    let conversationSid = null;
-    
-    const chatButton = document.getElementById('locsync-chat-button');
-    const chatWindow = document.getElementById('locsync-chat-window');
-    const chatClose = document.getElementById('locsync-chat-close');
-    const chatInput = document.getElementById('locsync-chat-input');
-    const chatSend = document.getElementById('locsync-chat-send');
-    const chatMessages = document.getElementById('locsync-chat-messages');
-    
-    chatButton.addEventListener('click', async () => {
-      chatWindow.style.display = 'flex';
-      chatButton.style.display = 'none';
-      
-      if (!sessionToken) {
-        await startSession();
-      }
-    });
-    
-    chatClose.addEventListener('click', () => {
-      chatWindow.style.display = 'none';
-      chatButton.style.display = 'flex';
-    });
-    
-    async function startSession() {
-      try {
-        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/start`, {
-          method: 'POST'
-        });
-        const data = await res.json();
-        
-        if (data.error) {
-          addMessage('bot', 'Chat is currently unavailable.');
-          return;
-        }
-        
-        sessionToken = data.sessionToken;
-        conversationSid = data.conversationSid;
-        
-        setTimeout(() => pollMessages(), 1000);
-      } catch (err) {
-        console.error('Start session error:', err);
-        addMessage('bot', 'Connection error. Please try again.');
-      }
-    }
-    
-    async function sendMessage(text) {
-      if (!text.trim() || !sessionToken) return;
-      
-      addMessage('user', text);
-      chatInput.value = '';
-      
-      try {
-        await fetch(`${API_BASE}/webchat/${TENANT_ID}/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionToken, message: text })
-        });
-        
-         // Poll 3 times with delays to catch the response
-    setTimeout(() => pollMessages(), 1000);
-    setTimeout(() => pollMessages(), 2000);
-    setTimeout(() => pollMessages(), 3000);
-  } catch (err) {
-    console.error('Send error:', err);
-    addMessage('bot', 'Failed to send message.');
-  }
-}
-    
-const seenMessages = new Set();
-
-async function pollMessages() {
-  if (!conversationSid) return;
-  
-  try {
-    const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
-    const data = await res.json();
-    
-    if (data.messages) {
-      // Sort by index to get them in order
-      data.messages.sort((a, b) => a.index - b.index);
-      
-      data.messages.forEach(msg => {
-        const msgId = msg.index;
-        if (!seenMessages.has(msgId) && msg.author === 'locsync_ai') {
-          addMessage('bot', msg.body);
-          seenMessages.add(msgId);
-        }
+    // Start
+    fetch(`${API}/webchat/${TENANT}/start`, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => {
+        token = d.sessionToken;
+        convo = d.conversationSid;
+        log('Connected');
+        setTimeout(check, 1000);
       });
-    }
-  } catch (err) {
-    console.error('Poll error:', err);
-  }
-}
-
-// REMOVE the setInterval completely - only poll after actions
-// DELETE THIS:
-// setInterval(() => {
-//   if (sessionToken) pollMessages();
-// }, 2000);
     
-    function addMessage(type, text) {
-      const msg = document.createElement('div');
-      msg.className = `locsync-message ${type}`;
-      msg.textContent = text;
-      chatMessages.appendChild(msg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Send
+    btn.onclick = () => {
+      const text = inp.value.trim();
+      if (!text) return;
+      
+      log('You: ' + text);
+      inp.value = '';
+      
+      fetch(`${API}/webchat/${TENANT}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionToken: token, message: text })
+      }).then(() => setTimeout(check, 2000));
+    };
+    
+    inp.onkeypress = (e) => { if (e.key === 'Enter') btn.click(); };
+    
+    // Check messages
+    function check() {
+      if (!convo) return;
+      
+      fetch(`${API}/webchat/${TENANT}/messages?conversationSid=${convo}&sessionToken=${token}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.messages) {
+            d.messages.forEach(m => {
+              if (m.author === 'locsync_ai' && !seenIndices.has(m.index)) {
+                log('Bot: ' + m.body);
+                seenIndices.add(m.index);
+              }
+            });
+          }
+        });
     }
     
-    chatSend.addEventListener('click', () => sendMessage(chatInput.value));
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage(chatInput.value);
-    });
-  })();
-</script>
+    function log(text) {
+      msgs.innerHTML += text + '<br>';
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  </script>
 </body>
 </html>
