@@ -333,8 +333,9 @@ app.post("/chat/webhook", async (req, res) => {
   console.log("✅ Processing message from:", author);
 
   const convo = await twilioClient.conversations.v1
-    .conversations(req.body.ConversationSid)
-    .fetch();
+  .services(CONV_SERVICE_SID)
+  .conversations(req.body.ConversationSid)
+  .fetch();
 
   const tenantId = safeJsonParse(convo.attributes).tenant_id;
   const config = loadTenantConfig(tenantId);
@@ -348,11 +349,12 @@ app.post("/chat/webhook", async (req, res) => {
   console.log("🤖 Sending reply:", reply);
 
   await twilioClient.conversations.v1
-    .conversations(convo.sid)
-    .messages.create({
-      author: "locsync_ai",
-      body: reply
-    });
+  .services(CONV_SERVICE_SID)
+  .conversations(convo.sid)
+  .messages.create({
+    author: "locsync_ai",
+    body: reply
+  });
 
   console.log("✅ Reply sent");
   res.json({ ok: true });
