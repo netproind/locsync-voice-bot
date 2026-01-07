@@ -22,46 +22,69 @@
     const inp = document.getElementById('input');
     const btn = document.getElementById('send');
     
+    function log(text) {
+      console.log(text);
+      msgs.innerHTML += text + '<br>';
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+    
     // Get access token and start
+    log('Requesting token...');
+    
     fetch(`${API}/webchat/${TENANT}/token`, { method: 'POST' })
-      .then(r => r.json())
-      .then(async d => {
-        log('Connecting...');
-        
-        // Initialize Twilio Conversations client
-        client = await Twilio.Conversations.Client.create(d.token);
-        
-        // Get or create conversation
-        conversation = await client.getConversationBySid(d.conversationSid);
-        
-        // Listen for new messages in real-time
-        conversation.on('messageAdded', (message) => {
-          if (message.author !== 'website_user') {
-            log('Bot: ' + message.body);
-          }
-        });
-        
-        log('Connected! Type a message.');
+      .then(r => {
+        log('Token response received');
+        return r.json();
       })
-      .catch(err => log('Error: ' + err.message));
+      .then(async d => {
+        log('Token: ' + d.token.substring(0, 20) + '...');
+        log('Conversation SID: ' + d.conversationSid);
+        log('Initializing Twilio client...');
+        
+        try {
+          client = await Twilio.Conversations.Client.create(d.token);
+          log('Client created successfully!');
+          
+          conversation = await client.getConversationBySid(d.conversationSid);
+          log('Conversation joined!');
+          
+          conversation.on('messageAdded', (message) => {
+            log('Message received: ' + message.author);
+            if (message.author !== client.user.identity) {
+              log('Bot: ' + message.body);
+            }
+          });
+          
+          log('Connected! Type a message.');
+        } catch (err) {
+          log('ERROR: ' + err.message);
+          log('Full error: ' + JSON.stringify(err));
+        }
+      })
+      .catch(err => {
+        log('Fetch error: ' + err.message);
+      });
     
     // Send message
     btn.onclick = async () => {
       const text = inp.value.trim();
-      if (!text || !conversation) return;
+      if (!text || !conversation) {
+        log('Cannot send: ' + (!text ? 'empty message' : 'no conversation'));
+        return;
+      }
       
       log('You: ' + text);
       inp.value = '';
       
-      await conversation.sendMessage(text);
+      try {
+        await conversation.sendMessage(text);
+        log('Message sent!');
+      } catch (err) {
+        log('Send error: ' + err.message);
+      }
     };
     
     inp.onkeypress = (e) => { if (e.key === 'Enter') btn.click(); };
-    
-    function log(text) {
-      msgs.innerHTML += text + '<br>';
-      msgs.scrollTop = msgs.scrollHeight;
-    }
   </script>
 </body>
 </html>
