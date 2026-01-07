@@ -208,13 +208,13 @@ async function pollMessages() {
     const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
     const data = await res.json();
     
-    console.log('📥 Received messages:', data);
-    
     if (data.messages) {
+      // Sort by index to get them in order
+      data.messages.sort((a, b) => a.index - b.index);
+      
       data.messages.forEach(msg => {
-        const msgId = `${msg.author}-${msg.index}`;
+        const msgId = msg.index;
         if (!seenMessages.has(msgId) && msg.author === 'locsync_ai') {
-          console.log('✅ Adding bot message:', msg.body);
           addMessage('bot', msg.body);
           seenMessages.add(msgId);
         }
@@ -224,11 +224,12 @@ async function pollMessages() {
     console.error('Poll error:', err);
   }
 }
-    
-    // Poll every 2 seconds
-    setInterval(() => {
-      if (sessionToken) pollMessages();
-    }, 2000);
+
+// REMOVE the setInterval completely - only poll after actions
+// DELETE THIS:
+// setInterval(() => {
+//   if (sessionToken) pollMessages();
+// }, 2000);
     
     function addMessage(type, text) {
       const msg = document.createElement('div');
