@@ -135,7 +135,6 @@
     
     let sessionToken = null;
     let conversationSid = null;
-    let lastMessageIndex = 0;
     
     const chatButton = document.getElementById('locsync-chat-button');
     const chatWindow = document.getElementById('locsync-chat-window');
@@ -200,25 +199,31 @@
       }
     }
     
-    async function pollMessages() {
-      if (!conversationSid) return;
-      
-      try {
-        const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
-        const data = await res.json();
-        
-        if (data.messages) {
-          data.messages.forEach(msg => {
-            if (msg.index > lastMessageIndex && msg.author === 'locsync_ai') {
-              addMessage('bot', msg.body);
-              lastMessageIndex = msg.index;
-            }
-          });
+const seenMessages = new Set();
+
+async function pollMessages() {
+  if (!conversationSid) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/webchat/${TENANT_ID}/messages?conversationSid=${conversationSid}&sessionToken=${sessionToken}`);
+    const data = await res.json();
+    
+    console.log('📥 Received messages:', data);
+    
+    if (data.messages) {
+      data.messages.forEach(msg => {
+        const msgId = `${msg.author}-${msg.index}`;
+        if (!seenMessages.has(msgId) && msg.author === 'locsync_ai') {
+          console.log('✅ Adding bot message:', msg.body);
+          addMessage('bot', msg.body);
+          seenMessages.add(msgId);
         }
-      } catch (err) {
-        console.error('Poll error:', err);
-      }
+      });
     }
+  } catch (err) {
+    console.error('Poll error:', err);
+  }
+}
     
     // Poll every 2 seconds
     setInterval(() => {
