@@ -49,8 +49,8 @@ function safeJsonParse(str, fallback = {}) {
 function loadTenantConfig(tenantId) {
   try {
     const filePath = path.join(__dirname, "config", "tenants", `${tenantId}.json`);
-     console.log("🔍 Looking for tenant at:", filePath); // ADD THIS
-    console.log("📁 File exists?", fs.existsSync(filePath)); // ADD THIS
+    console.log("🔍 Looking for tenant at:", filePath);
+    console.log("📁 File exists?", fs.existsSync(filePath));
     const config = JSON.parse(fs.readFileSync(filePath, "utf8"));
     console.log(`✅ Loaded tenant: ${config.salon_info.salon_name}`);
     return config;
@@ -146,7 +146,7 @@ app.post("/voice-response/:tenantId", async (req, res) => {
   const reply = await generateChatResponse(speech, config);
 
   const audio = await generateSpeech(reply, config.voice_config?.voice_id);
-  if (!audio) return res.type("text/xml").send(`<Response><Say>${reply}</Say></Response>`);
+  if (!audio) return res.type("text/xml").send(`<Response><Say>${reply}</Say></response>`);
 
   const key = `reply-${Date.now()}`;
   audioCache.set(key, audio);
@@ -162,7 +162,6 @@ app.post("/voice-response/:tenantId", async (req, res) => {
 /* =========================
    WEB CHAT START
 ========================= */
-// ADD THIS BEFORE THE /webchat/:tenantId/start ROUTE
 app.get("/test-config/:tenantId", (req, res) => {
   const config = loadTenantConfig(req.params.tenantId);
   res.json({
@@ -223,7 +222,7 @@ app.post("/webchat/:tenantId/send", async (req, res) => {
   await twilioClient.conversations.v1
     .conversations(sess.conversationSid)
     .messages.create({
-      author: "web_visitor",
+      author: "website_user",
       body: message
     });
 
@@ -231,38 +230,34 @@ app.post("/webchat/:tenantId/send", async (req, res) => {
 });
 
 /* =========================
-   CHAT WEBHOOK (FIXED LOOP)
+   GET MESSAGES
 ========================= */
-app.post("/chat/webhook", async (req, res) => {
-  if (req.body.EventType !== "onMessageAdded") return res.json({ ok: true });
-
-  const author = req.body.Author;
-  const body = (req.body.Body || "").trim();
-
-  if (!body) return res.json({ ok: true });
-  if (author === "locsync_ai") return res.json({ ok: true });
-  if (author === "web_visitor") return res.json({ ok: true });
-
-  const convo = await twilioClient.conversations.v1
-    .conversations(req.body.ConversationSid)
-    .fetch();
-
-  const tenantId = safeJsonParse(convo.attributes).tenant_id;
-  const config = loadTenantConfig(tenantId);
-  if (!config) return res.json({ ok: true });
-
-  const reply = await generateChatResponse(body, config);
-
-  await twilioClient.conversations.v1
-    .conversations(convo.sid)
-    .messages.create({
-      author: "locsync_ai",
-      body: reply
+app.get("/webchat/:tenantId/messages", async (req, res) => {
+  const { conversationSid, sessionToken } = req.query;
+  const sess = WEBCHAT_SESSIONS.get(sessionToken);
+  
+  if (!sess) return res.sendStatus(403);
+  
+  try {
+    const messages = await twilioClient.conversations.v1
+      .conversations(conversationSid)
+      .messages.list({ limit: 50 });
+    
+    res.json({
+      messages: messages.map(m => ({
+        author: m.author,
+        body: m.body,
+        index: m.index
+      }))
     });
-
-  res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+/* =========================
+   CHAT WEBHOOK
+========================= */
 app.post("/chat/webhook", async (req, res) => {
   console.log("🔔 Webhook received:", req.body.EventType);
   console.log("👤 Author:", req.body.Author);
@@ -283,11 +278,6 @@ app.post("/chat/webhook", async (req, res) => {
   
   if (author === "locsync_ai") {
     console.log("⏭️ Skipping own message");
-    return res.json({ ok: true });
-  }
-  
-  if (author === "web_visitor") {
-    console.log("⏭️ Skipping web visitor echo");
     return res.json({ ok: true });
   }
 
@@ -332,36 +322,13 @@ async function generateChatResponse(text, config) {
     return `Book here: ${config.booking.main_booking_url}`;
 
   if (msg.includes("price"))
-    return `Pricing: ${config.pricing.details}`;
+    return `Pricing varies by service. Visit our booking link for details.`;
 
   if (msg.includes("location"))
     return `Address: ${config.salon_info.location.address}`;
 
   return `I can help with HOURS, BOOKING, PRICING, or LOCATION.`;
 }
-app.get("/webchat/:tenantId/messages", async (req, res) => {
-  const { conversationSid, sessionToken } = req.query;
-  const sess = WEBCHAT_SESSIONS.get(sessionToken);
-  
-  if (!sess) return res.sendStatus(403);
-  
-  try {
-    const messages = await twilioClient.conversations.v1
-      .conversations(conversationSid)
-      .messages.list({ limit: 50 });
-    
-    res.json({
-      messages: messages.map(m => ({
-        author: m.author,
-        body: m.body,
-        index: m.index
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 
 /* =========================
    HEALTH CHECK
