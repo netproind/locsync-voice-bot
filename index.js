@@ -195,16 +195,21 @@ app.post("/webchat/:tenantId/token", async (req, res) => {
 
     token.addGrant(chatGrant);
 
-    const convo = await twilioClient.conversations.v1.conversations.create({
-      friendlyName: `${config.salon_info.salon_name} Web Chat`,
-      attributes: JSON.stringify({ tenant_id: req.params.tenantId })
-    });
+    // CREATE IN THE CORRECT SERVICE
+    const convo = await twilioClient.conversations.v1
+      .services(process.env.TWILIO_CONVERSATIONS_SERVICE_SID)
+      .conversations.create({
+        friendlyName: `${config.salon_info.salon_name} Web Chat`,
+        attributes: JSON.stringify({ tenant_id: req.params.tenantId })
+      });
 
     await twilioClient.conversations.v1
+      .services(process.env.TWILIO_CONVERSATIONS_SERVICE_SID)
       .conversations(convo.sid)
       .participants.create({ identity });
 
     await twilioClient.conversations.v1
+      .services(process.env.TWILIO_CONVERSATIONS_SERVICE_SID)
       .conversations(convo.sid)
       .messages.create({
         author: "locsync_ai",
