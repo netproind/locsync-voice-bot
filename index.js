@@ -60,6 +60,59 @@ function loadTenantConfig(tenantId) {
   }
 }
 
+app.post("/webchat/:tenantId/token", async (req, res) => {
+  try {
+    const config = loadTenantConfig(req.params.tenantId);
+    if (!config || !config.chat_config?.enabled) {
+      return res.status(403).json({ error: "Chat disabled" });
+    }
+
+    const AccessToken = twilio.jwt.AccessToken;
+    const ChatGrant = AccessToken.ChatGrant;
+
+    const identity = `user_${Date.now()}`;
+    const token = new AccessToken(
+      process.env.TWILIO_ACCOUNT_SID,
+      process.env.TWILIO_API_KEY,
+      process.env.TWILIO_API_SECRET,
+      { identity }
+    );
+
+    const chatGrant = new ChatGrant({
+      serviceSid: process.env.TWILIO_CONVERSATIONS_SERVICE_SID
+    });
+
+    token.addGrant(chatGrant);
+
+    // Create conversation
+    const convo = await twilioClient.conversations.v1.conversations.create({
+      friendlyName: `${config.salon_info.salon_name} Web Chat`,
+      attributes: JSON.stringify({ tenant_id: req.params.tenantId })
+    });
+
+    // Add user as participant
+    await twilioClient.conversations.v1
+      .conversations(convo.sid)
+      .participants.create({ identity });
+
+    // Send welcome message
+    await twilioClient.conversations.v1
+      .conversations(convo.sid)
+      .messages.create({
+        author: "locsync_ai",
+        body: `Hi! Welcome to ${config.salon_info.salon_name}. How can I help?`
+      });
+
+    res.json({ 
+      token: token.toJwt(), 
+      conversationSid: convo.sid 
+    });
+  } catch (error) {
+    console.error("Token error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /* =========================
    ELEVENLABS TTS
 ========================= */
