@@ -9,6 +9,8 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const twilio = require("twilio");
+const OpenAI = require("openai");
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const app = express();
 app.use(express.json());
@@ -57,6 +59,19 @@ function loadTenantConfig(tenantId) {
   } catch (err) {
     console.error("❌ Tenant config load failed:", tenantId);
     return null;
+  }
+}
+
+function loadKnowledgeFor(config) {
+  try {
+    // Load ONLY the universal loc care knowledge from root
+    if (fs.existsSync("./knowledge.md")) {
+      return fs.readFileSync("./knowledge.md", "utf8");
+    }
+    return "";
+  } catch (err) {
+    console.error("Knowledge load error:", err);
+    return "";
   }
 }
 
@@ -195,7 +210,6 @@ app.post("/webchat/:tenantId/token", async (req, res) => {
 
     token.addGrant(chatGrant);
 
-    // CREATE IN THE CORRECT SERVICE
     const convo = await twilioClient.conversations.v1
       .services(process.env.TWILIO_CONVERSATIONS_SERVICE_SID)
       .conversations.create({
@@ -332,32 +346,37 @@ app.post("/chat/webhook", async (req, res) => {
 
   console.log("✅ Processing message from:", author);
 
-  const convo = await twilioClient.conversations.v1
-  .services(CONV_SERVICE_SID)
-  .conversations(req.body.ConversationSid)
-  .fetch();
+  try {
+    const convo = await twilioClient.conversations.v1
+      .services(CONV_SERVICE_SID)
+      .conversations(req.body.ConversationSid)
+      .fetch();
 
-  const tenantId = safeJsonParse(convo.attributes).tenant_id;
-  const config = loadTenantConfig(tenantId);
-  
-  if (!config) {
-    console.log("❌ No config found");
-    return res.json({ ok: true });
+    const tenantId = safeJsonParse(convo.attributes).tenant_id;
+    const config = loadTenantConfig(tenantId);
+    
+    if (!config) {
+      console.log("❌ No config found");
+      return res.json({ ok: true });
+    }
+
+    const reply = await generateChatResponse(body, config);
+    console.log("🤖 Sending reply:", reply);
+
+    await twilioClient.conversations.v1
+      .services(CONV_SERVICE_SID)
+      .conversations(convo.sid)
+      .messages.create({
+        author: "locsync_ai",
+        body: reply
+      });
+
+    console.log("✅ Reply sent");
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("❌ Webhook error:", err);
+    res.json({ ok: true });
   }
-
-  const reply = await generateChatResponse(body, config);
-  console.log("🤖 Sending reply:", reply);
-
-  await twilioClient.conversations.v1
-  .services(CONV_SERVICE_SID)
-  .conversations(convo.sid)
-  .messages.create({
-    author: "locsync_ai",
-    body: reply
-  });
-
-  console.log("✅ Reply sent");
-  res.json({ ok: true });
 });
 
 /* =========================
@@ -366,19 +385,50 @@ app.post("/chat/webhook", async (req, res) => {
 async function generateChatResponse(text, config) {
   const msg = text.toLowerCase();
 
-  if (msg.includes("hour"))
+  // Quick answers from config.json
+  if (msg.includes("hour") && !msg.includes("how"))
     return `Hours: ${config.hours.schedule}`;
 
   if (msg.includes("book"))
     return `Book here: ${config.booking.main_booking_url}`;
 
-  if (msg.includes("price"))
-    return `Pricing varies by service. Visit our booking link for details.`;
-
-  if (msg.includes("location"))
+  if (msg.includes("location") || msg.includes("address"))
     return `Address: ${config.salon_info.location.address}`;
 
-  return `I can help with HOURS, BOOKING, PRICING, or LOCATION.`;
+  // Use OpenAI with universal knowledge + config data
+  try {
+    const universalKnowledge = loadKnowledgeFor(config);
+    
+    const systemPrompt = `You are the AI assistant for ${config.salon_info.salon_name}.
+
+Loctician: ${config.salon_info.loctician_name} (${config.salon_info.experience_years} years experience)
+Location: ${config.salon_info.location.address}
+Hours: ${config.hours.schedule}
+Services: ${config.services.primary.join(", ")}
+Specialties: ${config.services.specialties.join(", ")}
+
+Universal Loc Care Knowledge:
+${universalKnowledge}
+
+Answer questions about loc care and salon services. Keep responses under 3 sentences.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.7,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: text }
+      ],
+      max_tokens: 200
+    });
+
+    return completion.choices?.[0]?.message?.content?.trim() || 
+      "I can help with hours, booking, or location.";
+      
+  } catch (err) {
+    console.error("OpenAI error:", err);
+    return "I can help with hours, booking, or location.";
+  }
 }
 
 /* =========================
@@ -387,4 +437,4 @@ async function generateChatResponse(text, config) {
 app.get("/", (_, res) => res.send("LocSync running 🚀"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server live on ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server live on ${PORT}`)
