@@ -437,4 +437,4 @@ Answer questions about loc care and salon services. Keep responses under 3 sente
 app.get("/", (_, res) => res.send("LocSync running 🚀"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server live on ${PORT}`)
+app.listen(PORT, () => console.log(`🚀 Server live on ${PORT}`));
