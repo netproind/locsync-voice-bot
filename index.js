@@ -150,7 +150,7 @@ app.post("/voice/:tenantId", async (req, res) => {
     `);
   }
 
-  res.type("text/xml").send(`<Response><Say>${greeting}</Say></Response>`);
+  res.type("text/xml").send(`<Response><Say>${greeting}</Say><Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="5" /></Response>`);
 });
 
 app.post("/voice-response/:tenantId", async (req, res) => {
@@ -161,7 +161,7 @@ app.post("/voice-response/:tenantId", async (req, res) => {
   const reply = await generateChatResponse(speech, config);
 
   const audio = await generateSpeech(reply, config.voice_config?.voice_id);
-  if (!audio) return res.type("text/xml").send(`<Response><Say>${reply}</Say></Response>`);
+  if (!audio) return res.type("text/xml").send(`<Response><Say>${reply}</Say><Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="5" /></Response>`);
 
   const key = `reply-${Date.now()}`;
   audioCache.set(key, audio);
