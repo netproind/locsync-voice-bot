@@ -129,19 +129,45 @@ app.post("/voice/:tenantId", async (req, res) => {
   const config = loadTenantConfig(req.params.tenantId);
   if (!config) return res.type("text/xml").send(`<Response><Say>Not configured</Say></Response>`);
 
+  const callSid = req.body?.CallSid;
+  console.log("📞 CallSid received:", callSid);
+
+  // Start recording via REST API after short delay
+  if (callSid) {
+    setTimeout(async () => {
+      try {
+        const auth = Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64');
+        const recordResponse = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Calls/${callSid}/Recordings.json`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${auth}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              RecordingStatusCallback: `${PUBLIC_BASE_URL}/recording-status`,
+              RecordingStatusCallbackMethod: 'POST',
+            }).toString()
+          }
+        );
+        const data = await recordResponse.json();
+        console.log("📼 Recording API response:", JSON.stringify(data));
+      } catch (err) {
+        console.error("Recording start failed:", err);
+      }
+    }, 1500);
+  }
+
   const greeting =
     config.voice_config?.greeting_tts ||
-    `Thanks for calling ${config.salon_info.salon_name}. How can I help?`;
+    `Thanks for calling ${config.salon_info.salon_name}. This call may be recorded for quality purposes. How can I help?`;
 
-  const audio = await generateSpeech(
-    greeting,
-    config.voice_config?.voice_id
-  );
+  const audio = await generateSpeech(greeting, config.voice_config?.voice_id);
 
   if (audio) {
     const key = `greet-${Date.now()}`;
     audioCache.set(key, audio);
-
     return res.type("text/xml").send(`
       <Response>
         <Play>${PUBLIC_BASE_URL}/audio/${key}</Play>
@@ -173,7 +199,15 @@ app.post("/voice-response/:tenantId", async (req, res) => {
     </Response>
   `);
 });
-
+app.post("/recording-status", (req, res) => {
+  const { CallSid, RecordingSid, RecordingUrl, RecordingDuration, RecordingStatus } = req.body;
+  console.log("📼 Recording update:", { CallSid, RecordingSid, RecordingStatus, RecordingDuration: `${RecordingDuration}s`, RecordingUrl });
+  if (RecordingStatus === 'completed') {
+    console.log("✅ Recording saved:", RecordingUrl);
+    // Future: save to Airtable or admin dashboard
+  }
+  res.json({ received: true });
+});
 /* =========================
    WEB CHAT ROUTES
 ========================= */
