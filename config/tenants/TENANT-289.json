@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-289",
+  "salon_info": {
+    "salon_name": "Locafella Loc Studio",
+    "address": "7653 Melrose Ave, Los Angeles, CA 90046, USA",
+    "city": "Melrose",
+    "state": "California",
+    "website_url": "https://locafellalocs.com/loctician-near-melrose-la/?utm_source=GMBlistingMelroseAve&utm_medium=organic"
+  },
+  "contact": {
+    "business_phone": "(213) 563-3992",
+    "email": "locsyncbot+locafella@gmail.com",
+    "instagram": "locafellalocs"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "recNaPMvAEW2Pkj6Z",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 9:00 AM – 7:00 PM, Tuesday: 9:00 AM – 7:00 PM, Wednesday: 9:00 AM – 7:00 PM, Thursday: 9:00 AM – 7:00 PM, Friday: 9:00 AM – 7:00 PM, Saturday: 9:00 AM – 7:00 PM, Sunday: 9:00 AM – 7:00 PM",
+  "gmb": {
+    "rating": "4.7",
+    "site": "https://locafellalocs.com/loctician-near-melrose-la/?utm_source=GMBlistingMelroseAve&utm_medium=organic",
+    "working_hours": "Monday: 9:00 AM – 7:00 PM, Tuesday: 9:00 AM – 7:00 PM, Wednesday: 9:00 AM – 7:00 PM, Thursday: 9:00 AM – 7:00 PM, Friday: 9:00 AM – 7:00 PM, Saturday: 9:00 AM – 7:00 PM, Sunday: 9:00 AM – 7:00 PM"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-04-26T05:56:02.790Z",
+  "status": "partial"
+}
