@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-377",
+  "salon_info": {
+    "salon_name": "The Loc Spot",
+    "address": "5915 N Broad St, Philadelphia, PA 19141, USA",
+    "city": "Philadelphia",
+    "state": "PA",
+    "website_url": ""
+  },
+  "contact": {
+    "business_phone": "(215) 224-3800",
+    "email": "locspotpa@everybodyslocs.com",
+    "instagram": "Thelocspot"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: Closed, Tuesday: 10:00 AM – 6:00 PM, Wednesday: 10:00 AM – 6:00 PM, Thursday: 10:00 AM – 6:00 PM, Friday: 10:00 AM – 6:00 PM, Saturday: 10:00 AM – 4:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.5",
+    "site": "",
+    "working_hours": "Monday: Closed, Tuesday: 10:00 AM – 6:00 PM, Wednesday: 10:00 AM – 6:00 PM, Thursday: 10:00 AM – 6:00 PM, Friday: 10:00 AM – 6:00 PM, Saturday: 10:00 AM – 4:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-06-30T05:50:28.311Z",
+  "status": "partial"
+}
