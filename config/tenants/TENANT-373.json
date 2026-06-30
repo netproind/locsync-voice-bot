@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-373",
+  "salon_info": {
+    "salon_name": "The Candy Effect",
+    "address": "4001 Confederate Point Rd, Jacksonville, FL 32210, USA",
+    "city": "Jacksonville",
+    "state": "Fl",
+    "website_url": "https://thecandyeffect.as.me/"
+  },
+  "contact": {
+    "business_phone": "(904) 452-5909",
+    "email": "candy@everybodyslocs.com",
+    "instagram": "Thecandy.effect"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: Closed, Tuesday: 10:00 AM – 5:00 PM, Wednesday: 10:00 AM – 5:00 PM, Thursday: 10:00 AM – 5:00 PM, Friday: 10:00 AM – 5:00 PM, Saturday: 10:00 AM – 5:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.8",
+    "site": "https://thecandyeffect.as.me/",
+    "working_hours": "Monday: Closed, Tuesday: 10:00 AM – 5:00 PM, Wednesday: 10:00 AM – 5:00 PM, Thursday: 10:00 AM – 5:00 PM, Friday: 10:00 AM – 5:00 PM, Saturday: 10:00 AM – 5:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-06-30T04:50:29.273Z",
+  "status": "partial"
+}
