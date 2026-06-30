@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-376",
+  "salon_info": {
+    "salon_name": "E's Natural Locs",
+    "address": "2214 N 58th St, Philadelphia, PA 19131, USA",
+    "city": "Philadelphia",
+    "state": "PA",
+    "website_url": "http://www.esnaturallocs.com/"
+  },
+  "contact": {
+    "business_phone": "(267) 366-9105",
+    "email": "elicia@everybodyslocs.com",
+    "instagram": "E_natural_locs"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: Closed, Tuesday: 9:30 AM – 7:30 PM, Wednesday: 9:30 AM – 7:30 PM, Thursday: 9:30 AM – 7:30 PM, Friday: 9:30 AM – 7:30 PM, Saturday: 9:30 AM – 7:30 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.9",
+    "site": "http://www.esnaturallocs.com/",
+    "working_hours": "Monday: Closed, Tuesday: 9:30 AM – 7:30 PM, Wednesday: 9:30 AM – 7:30 PM, Thursday: 9:30 AM – 7:30 PM, Friday: 9:30 AM – 7:30 PM, Saturday: 9:30 AM – 7:30 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-06-30T05:35:26.358Z",
+  "status": "partial"
+}
