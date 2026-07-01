@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-388",
+  "salon_info": {
+    "salon_name": "The Loc Spot",
+    "address": "21328 Gratiot Ave, Eastpointe, MI 48021, USA",
+    "city": "Detroit",
+    "state": "MI",
+    "website_url": "http://thelocspot.com/detroit"
+  },
+  "contact": {
+    "business_phone": "(313) 856-8374",
+    "email": "locspotdetroit@everybodyslocs.com",
+    "instagram": "Thelocspot_detroit"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 12:00 – 4:00 PM, Tuesday: 10:00 AM – 5:00 PM, Wednesday: 10:00 AM – 5:00 PM, Thursday: 10:00 AM – 5:00 PM, Friday: 10:00 AM – 5:00 PM, Saturday: 10:00 AM – 5:00 PM, Sunday: 12:00 – 4:00 PM",
+  "gmb": {
+    "rating": "4.2",
+    "site": "http://thelocspot.com/detroit",
+    "working_hours": "Monday: 12:00 – 4:00 PM, Tuesday: 10:00 AM – 5:00 PM, Wednesday: 10:00 AM – 5:00 PM, Thursday: 10:00 AM – 5:00 PM, Friday: 10:00 AM – 5:00 PM, Saturday: 10:00 AM – 5:00 PM, Sunday: 12:00 – 4:00 PM"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-01T21:05:28.475Z",
+  "status": "partial"
+}
