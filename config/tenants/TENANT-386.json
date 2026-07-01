@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-386",
+  "salon_info": {
+    "salon_name": "Essence of Locks",
+    "address": "8499 Greenville Ave #206, Dallas, TX 75231, USA",
+    "city": "Dallas",
+    "state": "TX",
+    "website_url": "https://essenceoflocks.com/"
+  },
+  "contact": {
+    "business_phone": "(469) 608-9552",
+    "email": "essence@everybodyslocs.com",
+    "instagram": "Essenceoflocks"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: Closed, Tuesday: 9:00 AM – 7:00 PM, Wednesday: 9:00 AM – 7:00 PM, Thursday: 9:00 AM – 7:00 PM, Friday: 9:00 AM – 7:00 PM, Saturday: 9:00 AM – 7:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.4",
+    "site": "https://essenceoflocks.com/",
+    "working_hours": "Monday: Closed, Tuesday: 9:00 AM – 7:00 PM, Wednesday: 9:00 AM – 7:00 PM, Thursday: 9:00 AM – 7:00 PM, Friday: 9:00 AM – 7:00 PM, Saturday: 9:00 AM – 7:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-01T20:35:32.345Z",
+  "status": "partial"
+}
