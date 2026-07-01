@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-385",
+  "salon_info": {
+    "salon_name": "Dreads By Dotie (Dallas)",
+    "address": "2607 S Second Ave, Dallas, TX 75210, USA",
+    "city": "Dallas",
+    "state": "TX",
+    "website_url": "http://www.dreadsbydotie.com/"
+  },
+  "contact": {
+    "business_phone": "(214) 460-3445",
+    "email": "dotie@everybodyslocs.com",
+    "instagram": "Dreadsbydotie"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 9:00 AM – 4:00 PM, Tuesday: 9:00 AM – 4:00 PM, Wednesday: 9:00 AM – 4:00 PM, Thursday: 9:00 AM – 4:00 PM, Friday: 9:00 AM – 4:00 PM, Saturday: 9:00 AM – 4:00 PM, Sunday: 9:00 AM – 12:00 PM",
+  "gmb": {
+    "rating": "4.6",
+    "site": "http://www.dreadsbydotie.com/",
+    "working_hours": "Monday: 9:00 AM – 4:00 PM, Tuesday: 9:00 AM – 4:00 PM, Wednesday: 9:00 AM – 4:00 PM, Thursday: 9:00 AM – 4:00 PM, Friday: 9:00 AM – 4:00 PM, Saturday: 9:00 AM – 4:00 PM, Sunday: 9:00 AM – 12:00 PM"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-01T17:50:28.169Z",
+  "status": "partial"
+}
