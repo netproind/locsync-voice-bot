@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-381",
+  "salon_info": {
+    "salon_name": "1locnation Hair Gallery",
+    "address": "2347 W Marquette Rd, Chicago, IL 60636, USA",
+    "city": "Chicago",
+    "state": "IL",
+    "website_url": "http://www.1locnation.com/"
+  },
+  "contact": {
+    "business_phone": "(773) 440-4889",
+    "email": "locnation@everybodyslocs.com",
+    "instagram": "1locnation"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 11:00 AM – 9:00 PM, Tuesday: 9:00 AM – 8:00 PM, Wednesday: 9:00 AM – 8:00 PM, Thursday: 9:00 AM – 8:00 PM, Friday: 9:00 AM – 8:00 PM, Saturday: 7:00 AM – 6:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.5",
+    "site": "http://www.1locnation.com/",
+    "working_hours": "Monday: 11:00 AM – 9:00 PM, Tuesday: 9:00 AM – 8:00 PM, Wednesday: 9:00 AM – 8:00 PM, Thursday: 9:00 AM – 8:00 PM, Friday: 9:00 AM – 8:00 PM, Saturday: 7:00 AM – 6:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-01T02:05:28.815Z",
+  "status": "partial"
+}
