@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-380",
+  "salon_info": {
+    "salon_name": "The Loc Spa Salon ✂",
+    "address": "lower level, 2136 S Broad St, Philadelphia, PA 19145, USA",
+    "city": "Philadelphia",
+    "state": "PA",
+    "website_url": "http://www.locsbypeace.com/"
+  },
+  "contact": {
+    "business_phone": "(856) 981-7986",
+    "email": "locspa@everybodyslocs.com",
+    "instagram": "The_loc_spa"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 9:00 AM – 5:00 PM, Tuesday: 9:00 AM – 5:00 PM, Wednesday: 9:00 AM – 5:00 PM, Thursday: 9:00 AM – 5:00 PM, Friday: 9:00 AM – 5:00 PM, Saturday: 7:00 AM – 5:00 PM, Sunday: 9:00 AM – 5:00 PM",
+  "gmb": {
+    "rating": "4.4",
+    "site": "http://www.locsbypeace.com/",
+    "working_hours": "Monday: 9:00 AM – 5:00 PM, Tuesday: 9:00 AM – 5:00 PM, Wednesday: 9:00 AM – 5:00 PM, Thursday: 9:00 AM – 5:00 PM, Friday: 9:00 AM – 5:00 PM, Saturday: 7:00 AM – 5:00 PM, Sunday: 9:00 AM – 5:00 PM"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-01T01:50:25.984Z",
+  "status": "partial"
+}
