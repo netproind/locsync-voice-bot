@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-391",
+  "salon_info": {
+    "salon_name": "The Dopest Dreader Salon",
+    "address": "6050 Channingway Blvd, Columbus, OH 43232, USA",
+    "city": "Columbus",
+    "state": "OH",
+    "website_url": "http://styleseat.com/carlishamullins"
+  },
+  "contact": {
+    "business_phone": "(614) 694-2784",
+    "email": "dopestdreader@everybodyslocs.com",
+    "instagram": "The_dopest_dreader"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 9:00 AM – 9:00 PM, Tuesday: 9:00 AM – 9:00 PM, Wednesday: 9:00 AM – 9:00 PM, Thursday: 9:00 AM – 9:00 PM, Friday: 9:00 AM – 9:00 PM, Saturday: 9:00 AM – 9:00 PM, Sunday: 9:00 AM – 9:00 PM",
+  "gmb": {
+    "rating": "4.7",
+    "site": "http://styleseat.com/carlishamullins",
+    "working_hours": "Monday: 9:00 AM – 9:00 PM, Tuesday: 9:00 AM – 9:00 PM, Wednesday: 9:00 AM – 9:00 PM, Thursday: 9:00 AM – 9:00 PM, Friday: 9:00 AM – 9:00 PM, Saturday: 9:00 AM – 9:00 PM, Sunday: 9:00 AM – 9:00 PM"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-02T01:35:30.297Z",
+  "status": "partial"
+}
