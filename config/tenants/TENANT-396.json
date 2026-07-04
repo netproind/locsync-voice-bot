@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-396",
+  "salon_info": {
+    "salon_name": "Lubby's Locs",
+    "address": "1323 W Busch Blvd # D, Tampa, FL 33612, USA",
+    "city": "Tampa",
+    "state": "FL",
+    "website_url": "http://lubbys-locs.square.site/"
+  },
+  "contact": {
+    "business_phone": "(813) 520-1648",
+    "email": "lubbyslocs@everybodyslocs.com",
+    "instagram": "Lubbyslocs"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 10:00 AM – 6:00 PM, Tuesday: 10:00 AM – 6:00 PM, Wednesday: 10:00 AM – 6:00 PM, Thursday: 10:00 AM – 6:00 PM, Friday: 10:00 AM – 7:00 PM, Saturday: 10:00 AM – 7:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.9",
+    "site": "http://lubbys-locs.square.site/",
+    "working_hours": "Monday: 10:00 AM – 6:00 PM, Tuesday: 10:00 AM – 6:00 PM, Wednesday: 10:00 AM – 6:00 PM, Thursday: 10:00 AM – 6:00 PM, Friday: 10:00 AM – 7:00 PM, Saturday: 10:00 AM – 7:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-04T21:35:28.633Z",
+  "status": "partial"
+}
