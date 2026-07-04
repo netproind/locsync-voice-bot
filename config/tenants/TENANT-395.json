@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-395",
+  "salon_info": {
+    "salon_name": "Houston Loc Fairy",
+    "address": "Salon Lofts, 5353 W Alabama St #101, Houston, TX 77056, USA",
+    "city": "Houston",
+    "state": "TX",
+    "website_url": "http://locfairy.com/"
+  },
+  "contact": {
+    "business_phone": "(281) 849-4620",
+    "email": "locfairy@everybodyslocs.com",
+    "instagram": "Houstonlocfairy"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: 9:00 AM – 5:00 PM, Tuesday: 9:00 AM – 5:00 PM, Wednesday: 9:00 AM – 5:00 PM, Thursday: 9:00 AM – 5:00 PM, Friday: 9:00 AM – 5:00 PM, Saturday: Closed, Sunday: Closed",
+  "gmb": {
+    "rating": "4.8",
+    "site": "http://locfairy.com/",
+    "working_hours": "Monday: 9:00 AM – 5:00 PM, Tuesday: 9:00 AM – 5:00 PM, Wednesday: 9:00 AM – 5:00 PM, Thursday: 9:00 AM – 5:00 PM, Friday: 9:00 AM – 5:00 PM, Saturday: Closed, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-04T21:20:29.129Z",
+  "status": "partial"
+}
