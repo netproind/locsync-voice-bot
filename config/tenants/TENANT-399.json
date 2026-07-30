@@ -1,0 +1,32 @@
+{
+  "tenant_id": "TENANT-399",
+  "salon_info": {
+    "salon_name": "Loving Locks LLC",
+    "address": "9325 N Haggerty Rd, Plymouth, MI 48170, USA",
+    "city": "Plymouth",
+    "state": "MI",
+    "website_url": "https://www.lovinglocks.net/"
+  },
+  "contact": {
+    "business_phone": "(734) 795-0177",
+    "email": "loving@everybodyslocs.com",
+    "instagram": "Lovinglocs08"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Monday: Closed, Tuesday: 9:30 AM – 6:00 PM, Wednesday: Closed, Thursday: 9:30 AM – 6:00 PM, Friday: 9:30 AM – 6:00 PM, Saturday: 9:30 AM – 6:00 PM, Sunday: Closed",
+  "gmb": {
+    "rating": "4.8",
+    "site": "https://www.lovinglocks.net/",
+    "working_hours": "Monday: Closed, Tuesday: 9:30 AM – 6:00 PM, Wednesday: Closed, Thursday: 9:30 AM – 6:00 PM, Friday: 9:30 AM – 6:00 PM, Saturday: 9:30 AM – 6:00 PM, Sunday: Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-07-30T02:31:26.111Z",
+  "status": "partial"
+}
