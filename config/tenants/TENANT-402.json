@@ -1,0 +1,36 @@
+{
+  "tenant_id": "TENANT-402",
+  "salon_info": {
+    "salon_name": "The Loc'd Life",
+    "address": "4140 Legacy Dr.",
+    "city": "Plano",
+    "state": "TX",
+    "website_url": "www.thelocdlife.com"
+  },
+  "contact": {
+    "business_phone": "+12146902775",
+    "email": "reecec@everybodyslocs.com",
+    "instagram": "thelocdlife"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Tuesday thru Friday 8am to 5pm
+Saturday 8am to 4pm
+Sunday thru Monday  Closed",
+  "gmb": {
+    "rating": "",
+    "site": "www.thelocdlife.com",
+    "working_hours": "Tuesday thru Friday 8am to 5pm
+Saturday 8am to 4pm
+Sunday thru Monday  Closed"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-09-30T02:58:45.546Z",
+  "status": "partial"
+}
