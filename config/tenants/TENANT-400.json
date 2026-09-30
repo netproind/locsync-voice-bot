@@ -1,0 +1,50 @@
+{
+  "tenant_id": "TENANT-400",
+  "salon_info": {
+    "salon_name": "Locs by Zee",
+    "address": "12020 Bridgehampton Rd",
+    "city": "Jacksonville",
+    "state": "FL",
+    "website_url": "www.locsbyzee.com"
+  },
+  "contact": {
+    "business_phone": "+19042746028",
+    "email": "zee34@everybodyslocs.com",
+    "instagram": "locs_by_zee"
+  },
+  "phone_assignment": {
+    "assigned_phone_number": "",
+    "twilio_configured": false
+  },
+  "hours": "Sunday	Closed
+Monday	Closed
+Tuesday	8:30 AM–2:30 PM
+Wednesday	8:30 AM–2:30 PM
+Thursday	8:30 AM–2:30 PM
+5:30–8:30 PM
+Friday	8:30 AM–2:30 PM
+5:30–8:30 PM
+Saturday	8:30 AM–5:30 PM
+",
+  "gmb": {
+    "rating": "",
+    "site": "www.locsbyzee.com",
+    "working_hours": "Sunday	Closed
+Monday	Closed
+Tuesday	8:30 AM–2:30 PM
+Wednesday	8:30 AM–2:30 PM
+Thursday	8:30 AM–2:30 PM
+5:30–8:30 PM
+Friday	8:30 AM–2:30 PM
+5:30–8:30 PM
+Saturday	8:30 AM–5:30 PM
+"
+  },
+  "services": "",
+  "booking": {
+    "booking_url": "",
+    "booking_system": ""
+  },
+  "created_at": "2026-09-30T00:28:45.461Z",
+  "status": "partial"
+}
