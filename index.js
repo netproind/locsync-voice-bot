@@ -96,8 +96,7 @@ async function generateSpeech(text, voiceId) {
           model_id: "eleven_turbo_v2",
           voice_settings: {
             stability: 0.5,
-            similarity_boost: 0.75
-          }
+            similarity_boost: 0.75,\n            speed: 1.07\n          }
         })
       }
     );
@@ -113,6 +112,15 @@ async function generateSpeech(text, voiceId) {
    TEMP AUDIO CACHE
 ========================= */
 const audioCache = new Map();
+const pendingVoiceRequests = new Map();
+
+function needsThinkingCue(text = "") {
+  const t = String(text).trim().toLowerCase();
+  if (!t) return false;
+  if (/^(hi|hello|hey|thanks|thank you|bye|goodbye)[.!?]*$/.test(t)) return false;
+  if (/\b(hours?|open|close|closing|address|location|where are you|phone number|email|website|instagram|parking)\b/.test(t)) return false;
+  return true;
+}
 
 app.get("/audio/:key", (req, res) => {
   const audio = audioCache.get(req.params.key);
@@ -306,7 +314,15 @@ app.post("/voice/:tenantId", async (req, res) => {
     config.voice_config?.greeting_tts ||
     `Thanks for calling ${config.salon_info.salon_name}. This call may be recorded for quality purposes. How can I help?`;
 
-  const audio = await generateSpeech(greeting, config.voice_config?.voice_id);
+  const thinkingCue = "Got it, one moment while I check that for you.";
+  const [audio, thinkingAudio] = await Promise.all([
+    generateSpeech(greeting, config.voice_config?.voice_id),
+    generateSpeech(thinkingCue, config.voice_config?.voice_id)
+  ]);
+
+  if (thinkingAudio) {
+    audioCache.set(`thinking-${req.params.tenantId}`, thinkingAudio);
+  }
 
   if (audio) {
     const key = `greet-${Date.now()}`;
@@ -327,8 +343,45 @@ app.post("/voice-response/:tenantId", async (req, res) => {
   if (!config) return res.type("text/xml").send(`<Response><Say>Error</Say></Response>`);
 
   const speech = req.body.SpeechResult || "";
-  const decision = await generateAssistantDecision(speech, config, "voice");
   const callerPhone = req.body.From || "";
+  const callSid = req.body.CallSid || `call-${Date.now()}`;
+
+  if (needsThinkingCue(speech)) {
+    const token = `${callSid}-${Date.now()}`;
+    pendingVoiceRequests.set(token, { speech, callerPhone, tenantId: req.params.tenantId });
+    setTimeout(() => pendingVoiceRequests.delete(token), 120000);
+
+    const cueKey = `thinking-${req.params.tenantId}`;
+    const cue = audioCache.has(cueKey)
+      ? `<Play>${PUBLIC_BASE_URL}/audio/${cueKey}</Play>`
+      : `<Say>Got it, one moment while I check that for you.</Say>`;
+
+    return res.type("text/xml").send(
+      `<Response>${cue}<Redirect method="POST">${PUBLIC_BASE_URL}/voice-process/${req.params.tenantId}?token=${encodeURIComponent(token)}</Redirect></Response>`
+    );
+  }
+
+  return processVoiceTurn(req, res, config, speech, callerPhone);
+});
+
+app.post("/voice-process/:tenantId", async (req, res) => {
+  const config = loadTenantConfig(req.params.tenantId);
+  if (!config) return res.type("text/xml").send(`<Response><Say>Error</Say></Response>`);
+
+  const token = req.query.token || "";
+  const pending = pendingVoiceRequests.get(token);
+  if (!pending) {
+    return res.type("text/xml").send(
+      `<Response><Say>Sorry, I lost that request. Please tell me again.</Say><Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="7" /></Response>`
+    );
+  }
+
+  pendingVoiceRequests.delete(token);
+  return processVoiceTurn(req, res, config, pending.speech, pending.callerPhone);
+});
+
+async function processVoiceTurn(req, res, config, speech, callerPhone) {
+  const decision = await generateAssistantDecision(speech, config, "voice");
 
   if (decision.sms_url) {
     const sent = await sendSmsLink(callerPhone, config, decision.sms_url, decision.sms_label);
@@ -340,6 +393,7 @@ app.post("/voice-response/:tenantId", async (req, res) => {
   const spoken = decision.speech || "How else can I help?";
   const audio = await generateSpeech(spoken, config.voice_config?.voice_id);
   let lead;
+
   if (audio) {
     const key = `reply-${Date.now()}`;
     audioCache.set(key, audio);
@@ -348,22 +402,26 @@ app.post("/voice-response/:tenantId", async (req, res) => {
     lead = `<Say>${xmlEscape(spoken)}</Say>`;
   }
 
-  if (decision.action === "handoff" && config.contact?.handoff_phone) {
+  const asksAQuestion = /\?\s*$/.test(spoken.trim());
+  const explicitlyWantsHuman = /\b(human|person|someone|staff|team|loctician|owner|speak to|talk to|leave (a )?message|voicemail|call me back|callback)\b/i.test(speech);
+
+  if (decision.action === "handoff" && config.contact?.handoff_phone && explicitlyWantsHuman) {
     return res.type("text/xml").send(
       `<Response>${lead}<Dial>${xmlEscape(config.contact.handoff_phone)}</Dial></Response>`
     );
   }
 
-  if (decision.action === "message") {
+  if (decision.action === "message" && explicitlyWantsHuman && !asksAQuestion) {
     return res.type("text/xml").send(
       `<Response>${lead}<Say>Please leave your name, number, and a short message after the tone.</Say><Record maxLength="120" playBeep="true" recordingStatusCallback="${PUBLIC_BASE_URL}/recording-status" /><Hangup /></Response>`
     );
   }
 
   return res.type("text/xml").send(
-    `<Response>${lead}<Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="5" /></Response>`
+    `<Response>${lead}<Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${config.tenant_id}" timeout="7" /></Response>`
   );
-});
+}
+
 app.post("/recording-status", (req, res) => {
   const { CallSid, RecordingSid, RecordingUrl, RecordingDuration, RecordingStatus } = req.body;
   console.log("📼 Recording update:", { CallSid, RecordingSid, RecordingStatus, RecordingDuration: `${RecordingDuration}s`, RecordingUrl });
