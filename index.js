@@ -9,6 +9,8 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const twilio = require("twilio");
+const http = require("http");
+const { WebSocketServer, WebSocket } = require("ws");
 const OpenAI = require("openai");
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -206,7 +208,7 @@ async function sendSmsLink(to, config, url, label) {
   }
 }
 
-async function generateAssistantDecision(text, config, channel = "voice") {
+async function generateAssistantDecision(text, config, channel = "voice", history = []) {
   try {
     const universalKnowledge = loadKnowledgeFor(config);
     const tenantData = JSON.stringify(config, null, 2);
@@ -242,6 +244,15 @@ Critical behavior:
 11. action="handoff" only when the caller explicitly wants a person/team, a handoff phone exists, and business hours are listed strongly enough to support live transfer. If hours are blank/unclear, use action="message" instead.
 12. action="message" when human review/consultation is needed but a live transfer should not be assumed.
 13. Keep speech natural and usually under two sentences.
+14. Sound like an experienced, warm salon receptionist — not a questionnaire, not a chatbot, and not a clinical intake form.
+15. Ask ONE natural question at a time unless two details truly belong together.
+16. Answer direct questions directly before asking anything else.
+17. Use short acknowledgments naturally ("Absolutely", "Got you", "Okay") but do not repeat the same filler every turn and do not force slang.
+18. Do not say "to make sure" over and over. Do not explain your internal classification process.
+19. Do not dump a checklist of repair risks onto a routine caller. Ask the single highest-value next question, then continue based on their answer.
+20. Remember the conversation. Never ask for information the caller already gave unless you genuinely need clarification.
+21. If the caller sounds frustrated, confused, rushed, or wants a human, reduce questions and help them reach the simplest safe next step.
+22. The caller should feel helped, not screened.
 
 Return ONLY valid JSON in this exact shape:
 {"speech":"short spoken response","action":"answer|handoff|message","sms_url":"","sms_label":""}`;
@@ -252,6 +263,7 @@ Return ONLY valid JSON in this exact shape:
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
+        ...history.slice(-12),
         { role: "user", content: text }
       ],
       max_tokens: 260
@@ -276,163 +288,244 @@ async function generateChatResponse(text, config) {
 }
 
 /* =========================
-   VOICE WEBHOOKS
+   VOICE — TWILIO CONVERSATIONRELAY
 ========================= */
-app.post("/voice/:tenantId", async (req, res) => {
-  const config = loadTenantConfig(req.params.tenantId);
-  if (!config) return res.type("text/xml").send(`<Response><Say>Not configured</Say></Response>`);
 
-  const callSid = req.body?.CallSid;
-  console.log("📞 CallSid received:", callSid);
+function conciseGreeting(config) {
+  const custom = String(config.voice_config?.greeting_tts || "").trim();
+  if (custom && custom.length <= 180) return custom;
+  const salon = config.salon_info?.salon_name || "the salon";
+  return `Thanks for calling ${salon}. I'm the LocSync assistant. What can I help you with today?`;
+}
 
-  // Start recording via REST API after short delay
-  if (callSid) {
-    setTimeout(async () => {
-      try {
-        const auth = Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64');
-        const recordResponse = await fetch(
-          `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Calls/${callSid}/Recordings.json`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Basic ${auth}`,
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-              RecordingStatusCallback: `${PUBLIC_BASE_URL}/recording-status`,
-              RecordingStatusCallbackMethod: 'POST',
-            }).toString()
-          }
-        );
-        const data = await recordResponse.json();
-        console.log("📼 Recording API response:", JSON.stringify(data));
-      } catch (err) {
-        console.error("Recording start failed:", err);
-      }
-    }, 1500);
-  }
+function relayWsUrl() {
+  return `${PUBLIC_BASE_URL.replace(/^http/, "ws")}/conversation-relay`;
+}
 
-  const greeting =
-    config.voice_config?.greeting_tts ||
-    `Thanks for calling ${config.salon_info.salon_name}. This call may be recorded for quality purposes. How can I help?`;
+function sendRelayText(ws, text, { last = true, interruptible = true, preemptible = true } = {}) {
+  if (!text || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({
+    type: "text",
+    token: text,
+    last,
+    interruptible,
+    preemptible
+  }));
+}
 
-  const thinkingCue = "Got it, one moment while I check that for you.";
-  const [audio, thinkingAudio] = await Promise.all([
-    generateSpeech(greeting, config.voice_config?.voice_id),
-    generateSpeech(thinkingCue, config.voice_config?.voice_id)
-  ]);
-
-  if (thinkingAudio) {
-    audioCache.set(`thinking-${req.params.tenantId}`, thinkingAudio);
-  }
-
-  if (audio) {
-    const key = `greet-${Date.now()}`;
-    audioCache.set(key, audio);
-    return res.type("text/xml").send(`
-      <Response>
-        <Play>${PUBLIC_BASE_URL}/audio/${key}</Play>
-        <Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" />
-      </Response>
-    `);
-  }
-
-  res.type("text/xml").send(`<Response><Say>${greeting}</Say><Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="5" /></Response>`);
-});
-
-app.post("/voice-response/:tenantId", async (req, res) => {
-  const config = loadTenantConfig(req.params.tenantId);
-  if (!config) return res.type("text/xml").send(`<Response><Say>Error</Say></Response>`);
-
-  const speech = req.body.SpeechResult || "";
-  const callerPhone = req.body.From || "";
-  const callSid = req.body.CallSid || `call-${Date.now()}`;
-
-  if (needsThinkingCue(speech)) {
-    const token = `${callSid}-${Date.now()}`;
-    pendingVoiceRequests.set(token, { speech, callerPhone, tenantId: req.params.tenantId });
-    setTimeout(() => pendingVoiceRequests.delete(token), 120000);
-
-    const cueKey = `thinking-${req.params.tenantId}`;
-    const cue = audioCache.has(cueKey)
-      ? `<Play>${PUBLIC_BASE_URL}/audio/${cueKey}</Play>`
-      : `<Say>Got it, one moment while I check that for you.</Say>`;
-
-    return res.type("text/xml").send(
-      `<Response>${cue}<Redirect method="POST">${PUBLIC_BASE_URL}/voice-process/${req.params.tenantId}?token=${encodeURIComponent(token)}</Redirect></Response>`
-    );
-  }
-
-  return processVoiceTurn(req, res, config, speech, callerPhone);
-});
-
-app.post("/voice-process/:tenantId", async (req, res) => {
-  const config = loadTenantConfig(req.params.tenantId);
-  if (!config) return res.type("text/xml").send(`<Response><Say>Error</Say></Response>`);
-
-  const token = req.query.token || "";
-  const pending = pendingVoiceRequests.get(token);
-  if (!pending) {
-    return res.type("text/xml").send(
-      `<Response><Say>Sorry, I lost that request. Please tell me again.</Say><Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${req.params.tenantId}" timeout="7" /></Response>`
-    );
-  }
-
-  pendingVoiceRequests.delete(token);
-  return processVoiceTurn(req, res, config, pending.speech, pending.callerPhone);
-});
-
-async function processVoiceTurn(req, res, config, speech, callerPhone) {
-  const decision = await generateAssistantDecision(speech, config, "voice");
-
-  if (decision.sms_url) {
-    const sent = await sendSmsLink(callerPhone, config, decision.sms_url, decision.sms_label);
-    if (sent && !/text|send/i.test(decision.speech)) {
-      decision.speech = `${decision.speech} I sent the link by text.`;
+function startCallRecording(callSid) {
+  if (!callSid) return;
+  setTimeout(async () => {
+    try {
+      const auth = Buffer.from(`${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`).toString("base64");
+      await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Calls/${callSid}/Recordings.json`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${auth}`,
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            RecordingStatusCallback: `${PUBLIC_BASE_URL}/recording-status`,
+            RecordingStatusCallbackMethod: "POST"
+          }).toString()
+        }
+      );
+    } catch (err) {
+      console.error("Recording start failed:", err.message);
     }
+  }, 1200);
+}
+
+app.post("/voice/:tenantId", (req, res) => {
+  const config = loadTenantConfig(req.params.tenantId);
+  if (!config) {
+    return res.type("text/xml").send("<Response><Say>Not configured</Say></Response>");
   }
 
-  const spoken = decision.speech || "How else can I help?";
-  const audio = await generateSpeech(spoken, config.voice_config?.voice_id);
-  let lead;
+  startCallRecording(req.body?.CallSid);
 
-  if (audio) {
-    const key = `reply-${Date.now()}`;
-    audioCache.set(key, audio);
-    lead = `<Play>${PUBLIC_BASE_URL}/audio/${key}</Play>`;
+  const response = new twilio.twiml.VoiceResponse();
+  const connect = response.connect({
+    action: `${PUBLIC_BASE_URL}/voice-relay-ended/${req.params.tenantId}`
+  });
+
+  const relay = connect.conversationRelay({
+    url: relayWsUrl(),
+    welcomeGreeting: conciseGreeting(config),
+    welcomeGreetingInterruptible: "speech",
+    language: "en-US",
+    ttsProvider: "ElevenLabs",
+    voice: "UgBBYS2sOqTuMpoF3BR0-flash_v2_5-1.07_0.5_0.75",
+    transcriptionProvider: "Deepgram",
+    speechModel: "flux",
+    eotThreshold: "0.8",
+    speechTimeout: "3000",
+    ignoreBackchannel: "true",
+    interruptible: "any",
+    interruptSensitivity: "medium",
+    hints: "locs,retwist,interlocking,crochet,microlocs,Sisterlocks,wicks,wick maintenance,starter locs,instant locs,loc extensions,reattachment,loc repair,comb out"
+  });
+
+  relay.parameter({ name: "tenantId", value: req.params.tenantId });
+
+  res.type("text/xml").send(response.toString());
+});
+
+app.post("/voice-relay-ended/:tenantId", (req, res) => {
+  const config = loadTenantConfig(req.params.tenantId);
+  const handoff = safeJsonParse(req.body?.HandoffData || req.body?.handoffData || "{}", {});
+  const response = new twilio.twiml.VoiceResponse();
+
+  if (handoff.action === "handoff" && config?.contact?.handoff_phone) {
+    response.dial(config.contact.handoff_phone);
+  } else if (handoff.action === "message") {
+    response.say("Please leave your name, number, and a short message after the tone.");
+    response.record({
+      maxLength: 120,
+      playBeep: true,
+      recordingStatusCallback: `${PUBLIC_BASE_URL}/recording-status`
+    });
   } else {
-    lead = `<Say>${xmlEscape(spoken)}</Say>`;
+    response.hangup();
   }
 
-  const asksAQuestion = /\?\s*$/.test(spoken.trim());
-  const explicitlyWantsHuman = /\b(human|person|someone|staff|team|loctician|owner|speak to|talk to|leave (a )?message|voicemail|call me back|callback)\b/i.test(speech);
+  res.type("text/xml").send(response.toString());
+});
 
-  if (decision.action === "handoff" && config.contact?.handoff_phone && explicitlyWantsHuman) {
-    return res.type("text/xml").send(
-      `<Response>${lead}<Dial>${xmlEscape(config.contact.handoff_phone)}</Dial></Response>`
-    );
-  }
+function handleRelayConnection(ws) {
+  let session = null;
+  let turnId = 0;
 
-  if (decision.action === "message" && explicitlyWantsHuman && !asksAQuestion) {
-    return res.type("text/xml").send(
-      `<Response>${lead}<Say>Please leave your name, number, and a short message after the tone.</Say><Record maxLength="120" playBeep="true" recordingStatusCallback="${PUBLIC_BASE_URL}/recording-status" /><Hangup /></Response>`
-    );
-  }
+  ws.on("message", async raw => {
+    let msg;
+    try {
+      msg = JSON.parse(raw.toString());
+    } catch {
+      return;
+    }
 
-  return res.type("text/xml").send(
-    `<Response>${lead}<Gather input="speech" action="${PUBLIC_BASE_URL}/voice-response/${config.tenant_id}" timeout="7" /></Response>`
-  );
+    if (msg.type === "setup") {
+      const tenantId = msg.customParameters?.tenantId;
+      const config = loadTenantConfig(tenantId);
+      if (!config) {
+        ws.close(1008, "Unknown tenant");
+        return;
+      }
+
+      session = {
+        tenantId,
+        config,
+        callerPhone: msg.from || "",
+        callSid: msg.callSid || "",
+        history: [],
+        lastAssistantText: ""
+      };
+      console.log("ConversationRelay session ready:", tenantId, msg.callSid);
+      return;
+    }
+
+    if (!session) return;
+
+    if (msg.type === "interrupt") {
+      const heard = String(msg.utteranceUntilInterrupt || "").trim();
+      if (heard && session.history.length) {
+        for (let i = session.history.length - 1; i >= 0; i--) {
+          if (session.history[i].role === "assistant") {
+            session.history[i].content = heard;
+            break;
+          }
+        }
+      }
+      turnId += 1;
+      return;
+    }
+
+    if (msg.type === "error") {
+      console.error("ConversationRelay error:", msg.description || msg);
+      return;
+    }
+
+    if (msg.type !== "prompt" || msg.last !== true) return;
+
+    const speech = String(msg.voicePrompt || "").trim();
+    if (!speech) return;
+
+    const thisTurn = ++turnId;
+    let cueSent = false;
+    const cueTimer = setTimeout(() => {
+      if (thisTurn === turnId && ws.readyState === WebSocket.OPEN) {
+        cueSent = true;
+        sendRelayText(ws, "One sec.", { last: true, interruptible: true, preemptible: true });
+      }
+    }, 1400);
+
+    try {
+      const decision = await generateAssistantDecision(
+        speech,
+        session.config,
+        "voice",
+        session.history
+      );
+
+      clearTimeout(cueTimer);
+      if (thisTurn !== turnId || ws.readyState !== WebSocket.OPEN) return;
+
+      session.history.push({ role: "user", content: speech });
+      session.history.push({ role: "assistant", content: decision.speech });
+      session.history = session.history.slice(-14);
+      session.lastAssistantText = decision.speech;
+
+      if (decision.sms_url) {
+        const sent = await sendSmsLink(
+          session.callerPhone,
+          session.config,
+          decision.sms_url,
+          decision.sms_label
+        );
+        if (sent && !/text|send/i.test(decision.speech)) {
+          decision.speech = `${decision.speech} I sent that link by text.`;
+          session.history[session.history.length - 1].content = decision.speech;
+        }
+      }
+
+      sendRelayText(ws, decision.speech, {
+        last: true,
+        interruptible: true,
+        preemptible: cueSent
+      });
+
+      if (decision.action === "handoff" || decision.action === "message") {
+        setTimeout(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: "end",
+              handoffData: JSON.stringify({ action: decision.action })
+            }));
+          }
+        }, Math.max(1800, Math.min(6500, decision.speech.length * 45)));
+      }
+    } catch (err) {
+      clearTimeout(cueTimer);
+      console.error("Relay turn failed:", err);
+      if (thisTurn === turnId) {
+        sendRelayText(ws, "Sorry about that. What were you asking me about?");
+      }
+    }
+  });
+
+  ws.on("close", () => {
+    session = null;
+  });
 }
 
 app.post("/recording-status", (req, res) => {
   const { CallSid, RecordingSid, RecordingUrl, RecordingDuration, RecordingStatus } = req.body;
-  console.log("📼 Recording update:", { CallSid, RecordingSid, RecordingStatus, RecordingDuration: `${RecordingDuration}s`, RecordingUrl });
-  if (RecordingStatus === 'completed') {
-    console.log("✅ Recording saved:", RecordingUrl);
-    // Future: save to Airtable or admin dashboard
-  }
+  console.log("Recording update:", { CallSid, RecordingSid, RecordingStatus, RecordingDuration, RecordingUrl });
   res.json({ received: true });
 });
+
 /* =========================
    WEB CHAT ROUTES
 ========================= */
@@ -649,4 +742,19 @@ app.post("/chat/webhook", async (req, res) => {
 app.get("/", (_, res) => res.send("LocSync running 🚀"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Server live on ${PORT}`));
+const server = http.createServer(app);
+const wss = new WebSocketServer({ noServer: true });
+
+server.on("upgrade", (request, socket, head) => {
+  const pathname = new URL(request.url, PUBLIC_BASE_URL).pathname;
+  if (pathname !== "/conversation-relay") {
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(request, socket, head, ws => {
+    handleRelayConnection(ws);
+  });
+});
+
+server.listen(PORT, "0.0.0.0", () => console.log(`🚀 Server live on ${PORT}`));
