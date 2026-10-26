@@ -253,10 +253,6 @@ Critical behavior:
 20. Remember the conversation. Never ask for information the caller already gave unless you genuinely need clarification.
 21. If the caller sounds frustrated, confused, rushed, or wants a human, reduce questions and help them reach the simplest safe next step.
 22. The caller should feel helped, not screened.
-23. This is a HAIR LOC business. Words like loc, lock, locking, locksmithing, retwist, interlock, and loc maintenance refer to hair. NEVER interpret them as door locks, keys, locksmith services, or security unless the caller explicitly says they are asking about doors/keys/security. If they do, politely say this business specializes in hair loc services.
-24. NEVER set action="message" just because the service needs consultation, review, or a human decision. Stay in the conversation, explain the next step, and offer the consultation link or ask whether they want a person.
-25. Use action="message" only when the caller explicitly asks to leave a message, requests a callback, or explicitly asks for a human and live transfer is not appropriate.
-26. Use action="handoff" only when the caller explicitly asks to speak with a person/team and a valid handoff route is available.
 
 Return ONLY valid JSON in this exact shape:
 {"speech":"short spoken response","action":"answer|handoff|message","sms_url":"","sms_label":""}`;
@@ -455,7 +451,6 @@ function handleRelayConnection(ws) {
 
     const speech = String(msg.voicePrompt || "").trim();
     if (!speech) return;
-    console.log("RELAY_HEARD:", JSON.stringify({ tenantId: session.tenantId, speech }));
 
     const thisTurn = ++turnId;
     let cueSent = false;
@@ -473,17 +468,6 @@ function handleRelayConnection(ws) {
         "voice",
         session.history
       );
-
-      const explicitlyWantsHuman = /\b(human|person|someone|staff|team|loctician|owner|speak to|talk to|leave (a )?message|voicemail|call me back|callback)\b/i.test(speech);
-      if ((decision.action === "message" || decision.action === "handoff") && !explicitlyWantsHuman) {
-        decision.action = "answer";
-      }
-
-      console.log("RELAY_DECISION:", JSON.stringify({
-        tenantId: session.tenantId,
-        speech,
-        decision
-      }));
 
       clearTimeout(cueTimer);
       if (thisTurn !== turnId || ws.readyState !== WebSocket.OPEN) return;
