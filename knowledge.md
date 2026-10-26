@@ -768,10 +768,11 @@ Sectioning off loose hair to create or attach locs at the scalp. Some
 parting methods include, boxes, brick, triangles, diamonds, and natural
 parting where there is no distinct pattern.
 
-Locksmithing
+Locksmithing (HAIR LOC TERM — NOT keys, doors, or security)
 
-A rolling technique used in maintenance with the thumb instead of the
-palm roll.
+A rolling technique used in LOC HAIR maintenance with the thumb instead of the
+palm roll. In LocSync, "locksmithing" only refers to this hair-loc technique.
+Never interpret this term as a locksmith, key, door-lock, or security service.
 
 \[End of Loc Definitions\]
 
